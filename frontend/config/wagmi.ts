@@ -1,17 +1,29 @@
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { http } from "wagmi";
-import { polygonAmoy, arbitrumSepolia, baseSepolia } from "wagmi/chains";
+import '@rainbow-me/rainbowkit/styles.css';
+import {
+    getDefaultConfig,
+    RainbowKitProvider,
+} from '@rainbow-me/rainbowkit';
+import { WagmiProvider } from 'wagmi';
+import {
+    mainnet,
+    polygon,
+    optimism,
+    arbitrum,
+    base,
+    sepolia
+} from 'wagmi/chains';
+import {
+    QueryClientProvider,
+    QueryClient,
+} from "@tanstack/react-query";
+
+
 
 export const config = getDefaultConfig({
-    appName: "Decentralized Housing Governance",
-    projectId: "khaana-khazana", // ✅ real id
-    chains: [polygonAmoy, arbitrumSepolia, baseSepolia],
-    transports: {
-        [polygonAmoy.id]: http(),
-        [arbitrumSepolia.id]: http(),
-        [baseSepolia.id]: http(),
-    },
-    ssr: true,
+    appName: 'My RainbowKit App',
+    projectId: 'YOUR_PROJECT_ID',
+    chains: [sepolia,mainnet, polygon, optimism, arbitrum, base],
+    ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
-export default config;
+// xport default config;
