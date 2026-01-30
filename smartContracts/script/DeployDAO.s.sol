@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "forge-std/Script.sol";
+import "../lib/forge-std/src/Script.sol";
 import "../src/HousingGovernor.sol";
 import "../src/HousingToken.sol";
 import "../src/HousingTimelock.sol";
@@ -12,7 +12,7 @@ contract DeployDAO is Script {
 
         vm.startBroadcast();
 
-        HousingToken token = new HousingToken();
+        HousingToken token = new HousingToken(deployer);
         console.log("HousingToken deployed at:", address(token));
 
         address[] memory proposers = new address[](0);
