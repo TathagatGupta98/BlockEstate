@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================
+   Global Reset & Base Theme
+================================ */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: theme(colors.blood);
+  color: theme(colors.cream);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Ubuntu, Cantarell, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
+  line-height: 1.6;  
+}
+
+/* ================================
+   Typography Discipline
+================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: theme(colors.cream);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+p {
+  color: color-mix(in srgb, theme(colors.cream) 90%, transparent);
+}
+
+small,
+.muted {
+  color: theme(colors.taupe);
+}
+
+/* ================================
+   Links
+================================ */
+
+a {
+  color: theme(colors.cream);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+a:hover {
+  color: theme(colors.gold);
+}
+
+/* ================================
+   Forms (minimal, neutral)
+================================ */
+
+input,
+textarea,
+select {
+  background-color: theme(colors.merlot);
+  border: 1px solid theme(colors.taupe);
+  color: theme(colors.cream);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: theme(colors.taupe);
+}
+
+/* ================================
+   Focus States (no glow)
+================================ */
+
+*:focus-visible {
+  outline: 1px solid theme(colors.gold);
+  outline-offset: 2px;
+}
+
+/* ================================
+   Disable Shadows Globally
+================================ */
+
+* {
+  box-shadow: none !important;
+}
+
+/* ================================
+   Motion Discipline
+================================ */
+
+* {
+  transition-property: color, background-color, border-color, opacity;
+  transition-duration: 200ms;
+}
+
+/* ================================
+   Utility: visually hidden (a11y)
+================================ */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
