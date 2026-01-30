@@ -1,18 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
 
-const company=new mongoose.Schema({
-    name:{
-        type:String,
-        required:true,
+const company = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  walletAddress: {
+    type: String,
+  },
+  verified: {
+    type: String,
+    enum: ["pending", "verified", "rejected"],
+    default: "pending"
+  },
+}, { timestamps: true });
 
-    },
-    walletAddress:{
-        type:String,
-    },
-    verified:{
-        type:String,
-    },
-
-},{timestamps:true})
-
-export const Company=model("Company",company);
+export const Company =mongoose.model("Company", company);

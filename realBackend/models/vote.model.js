@@ -16,4 +16,4 @@ const vote=new mongoose.Schema({
 
 },{timestamps:true})
 
-const Vote=model("Vote",vote);
+export const Vote=mongoose.model("Vote",vote);

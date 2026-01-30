@@ -52,4 +52,4 @@ user.methods.generateRefreshToken = function () {
 
 
 
-const User=mongoose.model('User',user);
+export const User=mongoose.model('User',user);

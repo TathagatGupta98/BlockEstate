@@ -1,4 +1,4 @@
-import { registerUser,loginUser,logoutUser } from "../controllers/user.controller";
+import { registerUser,loginUser,logoutUser } from "../controllers/user.controller.js";
 import {Router} from "express";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 const router=Router();
