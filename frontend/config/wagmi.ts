@@ -1,28 +1,17 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { createConfig, http } from "wagmi";
-import {
-  polygonAmoy,
-  arbitrumSepolia,
-  baseSepolia
-} from "wagmi/chains";
+import { http } from "wagmi";
+import { polygonAmoy, arbitrumSepolia, baseSepolia } from "wagmi/chains";
 
-/**
- * Supported chains
- * Pick ONE as primary later if needed
- */
-export const config = createConfig(
-  getDefaultConfig({
+export const config = getDefaultConfig({
     appName: "Decentralized Housing Governance",
-    projectId: "YOUR_WALLETCONNECT_PROJECT_ID", // required
-    chains: [
-      polygonAmoy,
-      arbitrumSepolia,
-      baseSepolia
-    ],
+    projectId: "khaana-khazana", // ✅ real id
+    chains: [polygonAmoy, arbitrumSepolia, baseSepolia],
     transports: {
-      [polygonAmoy.id]: http(),
-      [arbitrumSepolia.id]: http(),
-      [baseSepolia.id]: http()
-    }
-  })
-);
+        [polygonAmoy.id]: http(),
+        [arbitrumSepolia.id]: http(),
+        [baseSepolia.id]: http(),
+    },
+    ssr: true,
+});
+
+export default config;

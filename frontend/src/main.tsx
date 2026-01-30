@@ -5,18 +5,18 @@ import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { config } from "./../config/wagmi";
 import App from "./App";
-import "./../styles/globals.css";
+import "./styles/globals.css";
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <WagmiProvider config={config}>
-      <RainbowKitProvider>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </RainbowKitProvider>
-    </WagmiProvider>
-  </React.StrictMode>
+    <React.StrictMode>
+        <WagmiProvider config={config}>
+            <QueryClientProvider client={queryClient}>
+                <RainbowKitProvider>
+                    <App />
+                </RainbowKitProvider>
+            </QueryClientProvider>
+        </WagmiProvider>
+    </React.StrictMode>
 );
