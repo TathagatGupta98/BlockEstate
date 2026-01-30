@@ -14,8 +14,6 @@ const router = Router();
 router.post("/create", createProposal);
 router.get("/", getAllProposals);
 router.get("/:id", getProposalById);
-router.put("/:id", updateProposal);
-router.delete("/:id", deleteProposal);
 router.patch("/:id/accept", acceptProposal);
 router.patch("/:id/reject", rejectProposal);
 

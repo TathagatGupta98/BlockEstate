@@ -14,7 +14,6 @@ router.post("/create", createBid);
 router.get("/proposal/:proposalId", getBidsForProposal);
 router.get("/company/:companyId", getBidsByCompany);
 router.get("/:id", getBidById);
-router.put("/:id", updateBid);
-router.delete("/:id", deleteBid);
+
 
 export default router;
