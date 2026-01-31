@@ -130,7 +130,7 @@ export const getMyVotes = asyncHandler(async (req, res) => {
 });
 
 
-// ================= REMOVE VOTE =================
+
 
 // export const removeVote = asyncHandler(async (req, res) => {
 
