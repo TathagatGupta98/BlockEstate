@@ -28,11 +28,11 @@ export const Signup = () => {
     setLoading(true);
     setError("");
 
-    if (!form.username || !form.email || !form.password || !form.walletAddress || !form.HouseNo) {
-      setError("All fields are required");
-      setLoading(false);
-      return;
-    }
+    // if (!form.username || !form.email || !form.password || !form.walletAddress || !form.HouseNo) {
+    //   setError("All fields are required");
+    //   setLoading(false);
+    //   return;
+    // }
 
     
     try {
@@ -93,11 +93,11 @@ export const Signup = () => {
           <input
             name="password"
             type="password"
-            placeholder="Password (min 6 characters)"
+            placeholder="Password"
             value={form.password}
             onChange={handleChange}
             required
-            minLength={6}
+        
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -125,17 +125,29 @@ export const Signup = () => {
             value={form.HouseNo}
             onChange={handleChange}
             required
-            min="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <button 
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+          className={`w-full text-white py-3 rounded-md transition ${
+             loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {loading ? "Creating Account..." : "Create Account"}
+          {loading ? (
+             <span className="flex items-center justify-center gap-2">
+               {/* Simple Spinner */}
+               <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+               </svg>
+               Creating User & Minting Token...
+             </span>
+          ) : (
+             "Create Account"
+          )}
         </button>
       </form>
 
