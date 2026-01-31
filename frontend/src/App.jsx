@@ -9,6 +9,8 @@ import { WagmiProvider } from 'wagmi';
 import { config } from './components/walletButton';
 import Header from './components/Header';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
 // ... Imports for Wagmi Providers (same as before) ...
 
 // const router = createBrowserRouter([
@@ -38,7 +40,9 @@ function App() {
           
            
             <Routes>
-            
+              <Route path="signup" element={<Signup/>}/>
+              
+              <Route path="login" element={<Login/>}/>
               <Route path="/" element={<Landing/>}/>
               <Route path="/payfess"  element={<PayDues/>}/>
               <Route path="/dashboard" element={<Dashboard/>}/>

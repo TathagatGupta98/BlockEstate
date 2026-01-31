@@ -13,14 +13,14 @@ const generateTokens = async (user) => {
 };
 
 export const registerUser = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body;
-  if (!email || !username || !password)
+  const { email, username, password,walletAddress,HouseNo } = req.body;
+  if (!email || !username || !password || !walletAddress || !HouseNo )
     throw new ApiError(400, "All fields required");
 
   const exists = await User.findOne({ $or: [{ email }, { username }] });
   if (exists) throw new ApiError(409, "User exists");
 
-  const user = await User.create({ email, username, password });
+  const user = await User.create({ email, username, password,walletAddress,HouseNo });
   res.status(201).json(new ApiResponse(201, user, "Registered"));
 });
 

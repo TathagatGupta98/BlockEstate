@@ -17,6 +17,10 @@ const user=new mongoose.Schema({
     walletAddress:{
         type:String,
         required:true,
+    },
+    HouseNo:{
+      type:Number,
+      required:true,
     }
 
 
