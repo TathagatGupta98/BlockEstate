@@ -14,9 +14,8 @@ import { PayDues } from './pages/PayDues';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { CompanyDashboard } from './pages/company/CompanyDashboard';
-<<<<<<< Updated upstream
-import { CompanyBid } from './pages/company/CompanyBid';
-=======
+// import { CompanyBid } from './pages/company/CompanyBid';
+// import { CompanyBid } from './pages/company/CompanyBid';
 // import { CompanyBid } from './pages/company/CompanyBid';
 import VotePage from './pages/VotePages';
 import CreateCompany from './pages/CreatCompany';
@@ -24,7 +23,8 @@ import Companies from './pages/Compaines';
 import BidPage from './pages/BidPage';
 import CreateBid from './pages/CreateBid';
 import ProposalBids from './pages/ProposalBids';
->>>>>>> Stashed changes
+
+
 
 // 1. Initialize QueryClient OUTSIDE the component to prevent resets
 const queryClient = new QueryClient();
@@ -40,9 +40,7 @@ const router = createBrowserRouter([
       { path: "propose", element: <RaiseProposal /> },
       { path: "pay", element: <PayDues /> },
       { path: "company/dashboard", element: <CompanyDashboard /> },
-<<<<<<< Updated upstream
-      { path: "company/bid/:id", element: <CompanyBid /> },
-=======
+      // { path: "company/bid/:id", element: <CompanyBid /> },
       // { path: "company/bid/:id", element: <CompanyBid /> },
       {path:"/votepages",element:<VotePage/>},
       {path:"/creatCompaines",element:<CreateCompany/>},
@@ -52,7 +50,12 @@ const router = createBrowserRouter([
       {path:"/bidpage",element:<BidPage/>},
 
       
->>>>>>> Stashed changes
+      {path:"/companies",element:<Companies/>},
+      {path:"/createbid",element:<CreateBid/>},
+      {path:"/proposalbids",element:<ProposalBids/>},
+      {path:"/bidpage",element:<BidPage/>},
+
+      
     ],
   },
   // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
