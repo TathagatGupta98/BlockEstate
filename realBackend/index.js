@@ -15,6 +15,8 @@ import companyVoteRoutes from "./routes/companyvote.route.js";
 // Import middleware
 import { verifyJWT } from "./middlewares/auth.middlewares.js";
 
+import aiRoutes from "./routes/ai.route.js";
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -49,6 +51,7 @@ app.use("/api/v1/bids", verifyJWT, bidRoutes);
 app.use("/api/v1/companies", companyRoutes);
 app.use("/api/v1/votes", verifyJWT, voteRoutes);
 app.use("/api/v1/company-votes", verifyJWT, companyVoteRoutes);
+app.use("/api/v1/ai", aiRoutes);
 
 // ============= ERROR HANDLING =============
 

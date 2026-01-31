@@ -10,6 +10,8 @@ import {
 const API_BASE = "http://localhost:8000";
 
 export function Dashboard() {
+
+
   const { address } = useAccount();
   const [proposalIdInput, setProposalIdInput] = useState('');
   const [isOverdue, setIsOverdue] = useState(true);
@@ -23,6 +25,13 @@ export function Dashboard() {
 
   // ✅ New State: Store vote context (ID + support) temporarily while waiting for blockchain
   const [pendingVoteCtx, setPendingVoteCtx] = useState(null);
+
+  // ✅ AI feasibility tooltip state + cache
+  const [openTooltipFor, setOpenTooltipFor] = useState(null); // mongo _id
+  const [loadingFeasibilityFor, setLoadingFeasibilityFor] = useState(null);
+  const [feasibilityCache, setFeasibilityCache] = useState({}); // { [mongoId]: result }
+  const [feasibilityError, setFeasibilityError] = useState(null);
+
 
   const fetchProposals = async () => {
     try {
@@ -68,6 +77,47 @@ export function Dashboard() {
       setLoadingProposals(false);
     }
   };
+
+
+  const fetchFeasibility = async (proposal) => {
+    const mongoId = proposal?._id;
+    if (!mongoId) return;
+
+    // 1) cache hit
+    if (feasibilityCache[mongoId]) {
+      setOpenTooltipFor(mongoId);
+      return;
+    }
+
+    try {
+      setFeasibilityError(null);
+      setLoadingFeasibilityFor(mongoId);
+
+      const res = await fetch(`${API_BASE}/api/v1/ai/proposal/feasibility`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: proposal.description }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.message || "Failed to analyze feasibility");
+      }
+
+      setFeasibilityCache((prev) => ({
+        ...prev,
+        [mongoId]: json.data,
+      }));
+
+      setOpenTooltipFor(mongoId);
+    } catch (err) {
+      setFeasibilityError(err?.message || "AI analysis failed");
+    } finally {
+      setLoadingFeasibilityFor(null);
+    }
+  };
+
 
   useEffect(() => {
     fetchProposals();
@@ -387,16 +437,105 @@ export function Dashboard() {
                            </div>
 
                            {/* Select Button */}
-                           <button
-                               onClick={() => {
-                                 setSelectedMongoProposalId(p._id);
-                                 setProposalIdInput(p.onChainProposalId || "");
-                                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                               }}
-                               className="w-full text-center bg-gray-50 text-gray-600 py-2 rounded-lg text-xs font-bold border border-gray-200 hover:bg-maroon-50 hover:text-maroon-700 hover:border-maroon-200 transition"
-                           >
-                             Select ID
-                           </button>
+                           <div className="flex items-center gap-2 relative">
+  {/* ✅ Feasibility */}
+  <button
+    type="button"
+    onClick={() => fetchFeasibility(p)}
+    className="w-9 h-9 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-black flex items-center justify-center"
+    title="Check feasibility"
+  >
+    {loadingFeasibilityFor === p._id ? (
+      <Loader2 size={16} className="animate-spin" />
+    ) : (
+      "?"
+    )}
+  </button>
+
+  {/* Tooltip */}
+  {openTooltipFor === p._id && (
+    <div className="absolute right-0 top-11 z-50 w-[380px] bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-bold text-gray-900">Feasibility Report</p>
+        <button
+          onClick={() => setOpenTooltipFor(null)}
+          className="text-gray-500 hover:text-gray-900"
+        >
+          ✕
+        </button>
+      </div>
+
+      {feasibilityError && (
+        <p className="text-sm text-red-600 mt-2">{feasibilityError}</p>
+      )}
+
+      {feasibilityCache[p._id] ? (
+        <>
+          <div className="mt-3 text-sm space-y-2">
+            <p>
+              <span className="font-bold">Feasibility:</span>{" "}
+              {feasibilityCache[p._id].feasibility}{" "}
+              <span className="text-gray-400">
+                ({Math.round(feasibilityCache[p._id].feasibilityScore * 100)}%)
+              </span>
+            </p>
+
+            <p>
+              <span className="font-bold">Risk:</span>{" "}
+              {Math.round(feasibilityCache[p._id].riskScore * 100)}%
+            </p>
+
+            <p>
+              <span className="font-bold">Time:</span>{" "}
+              {feasibilityCache[p._id].approxTimeMonths} months
+            </p>
+
+            <p>
+              <span className="font-bold">Budget:</span>{" "}
+              {feasibilityCache[p._id].approxBudgetLevel}
+            </p>
+
+            {!!feasibilityCache[p._id].keyRisks?.length && (
+              <div>
+                <p className="font-bold mb-1">Key Risks</p>
+                <ul className="list-disc ml-5 text-gray-700">
+                  {feasibilityCache[p._id].keyRisks.slice(0, 4).map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {!!feasibilityCache[p._id].suggestedChanges?.length && (
+              <div>
+                <p className="font-bold mb-1">Suggested Changes</p>
+                <ul className="list-disc ml-5 text-gray-700">
+                  {feasibilityCache[p._id].suggestedChanges.slice(0, 4).map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-gray-500 mt-2">No analysis yet.</p>
+      )}
+    </div>
+  )}
+
+  {/* ✅ existing Use ID button */}
+  <button
+    onClick={() => {
+      setSelectedMongoProposalId(p._id);
+      setProposalIdInput(p.onChainProposalId || "");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
+    className="bg-maroon-50 text-maroon-900 px-4 py-2 rounded-lg text-sm font-bold hover:bg-maroon-100 transition whitespace-nowrap"
+  >
+    Use ID
+  </button>
+</div>
                          </div>
                        ))
                      )}

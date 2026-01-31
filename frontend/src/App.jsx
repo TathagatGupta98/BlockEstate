@@ -56,7 +56,6 @@ function App() {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          {/* The RouterProvider handles all navigation */}
           <RouterProvider router={router} />
         </RainbowKitProvider>
       </QueryClientProvider>
