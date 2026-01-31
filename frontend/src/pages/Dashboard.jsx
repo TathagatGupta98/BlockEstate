@@ -1,49 +1,28 @@
-import { useBalance, useReadContract, useWriteContract, useAccount } from "wagmi";
-import {
-  TIMELOCK_ADDRESS,
-  GOVERNOR_ADDRESS,
-  GOVERNOR_ABI,
-  TOKEN_ADDRESS,
-  TOKEN_ABI,
-} from "../abis";
-import { useEffect, useState } from "react";
+import { useBalance, useReadContract, useWriteContract, useAccount } from 'wagmi';
+import { TIMELOCK_ADDRESS, GOVERNOR_ADDRESS, GOVERNOR_ABI, TOKEN_ADDRESS, TOKEN_ABI } from '../abis';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, Search, AlertOctagon, Lock, Loader2, RefreshCw, BarChart3 } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000";
 
 export function Dashboard() {
   const { address } = useAccount();
+  const [proposalIdInput, setProposalIdInput] = useState('');
+  const [isOverdue, setIsOverdue] = useState(true);
 
-  // On-chain proposal ID input (uint256-like string)
-  const [proposalIdInput, setProposalIdInput] = useState("");
-
-  // Selected Mongo proposal _id (ObjectId string) - used for DB vote endpoint
-  const [selectedMongoProposalId, setSelectedMongoProposalId] = useState("");
-
-  // Proposals list from MongoDB
+  // ✅ proposals state
   const [proposals, setProposals] = useState([]);
   const [loadingProposals, setLoadingProposals] = useState(false);
   const [proposalError, setProposalError] = useState(null);
 
-  const [isSavingVote, setIsSavingVote] = useState(false);
+  // ✅ selected proposal mapping
+  const [selectedMongoProposalId, setSelectedMongoProposalId] = useState(null);
 
-  // 1) Treasury
-  const { data: treasuryBal } = useBalance({ address: TIMELOCK_ADDRESS });
+  // ✅ user feedback for vote actions
+  const [voteMsg, setVoteMsg] = useState("");
 
-  // 2) Voting power
-  const { data: votes } = useReadContract({
-    address: TOKEN_ADDRESS,
-    abi: TOKEN_ABI,
-    functionName: "getVotes",
-    args: address ? [address] : undefined,
-  });
-
-  // 3) Delegate to self
-  const { writeContract: delegate, isPending: isDelegating } = useWriteContract();
-
-  // 4) Vote on-chain
-  const { writeContractAsync: voteAsync, isPending: isVoting } = useWriteContract();
-
-  // Fetch proposals from MongoDB
+  // Fetch Proposals from MongoDB
   const fetchProposals = async () => {
     try {
       setLoadingProposals(true);
@@ -62,233 +41,258 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchProposals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save vote to DB (Vote collection)
-  const saveVoteToDb = async (valueBool) => {
-    if (!selectedMongoProposalId) {
-      throw new Error("Select a proposal first (MongoDB _id missing).");
+  // Check Maintenance Status
+  useEffect(() => {
+    const lastPayment = localStorage.getItem('lastMaintenancePayment');
+    if (lastPayment) {
+      const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+      if (Date.now() - parseInt(lastPayment) < thirtyDaysInMs) {
+        setIsOverdue(false);
+      }
     }
+  }, []);
 
-    setIsSavingVote(true);
+  const { data: treasuryBal, isLoading, refetch, isRefetching } = useBalance({
+    address: TIMELOCK_ADDRESS,
+    chainId: 11155111,
+    query: { refetchInterval: 5000, staleTime: 0 }
+  });
 
-    const res = await fetch(`${API_BASE}/api/v1/votes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include", // IMPORTANT: because verifyJWT uses cookies
-      body: JSON.stringify({
-        proposalId: selectedMongoProposalId, // MUST be ObjectId (mongo)
-        value: valueBool,
-      }),
+  const { data: votes } = useReadContract({
+    address: TOKEN_ADDRESS,
+    abi: TOKEN_ABI,
+    functionName: 'getVotes',
+    args: address ? [address] : undefined,
+  });
+
+  const { writeContract: delegate, isPending: isDelegating } = useWriteContract();
+  const { writeContract: vote, isPending: isVoting } = useWriteContract();
+
+  // ✅ Update vote count in MongoDB
+  const updateVoteInDb = async (mongoId, support) => {
+    if (!mongoId) return;
+
+    const endpoint =
+        support === 1
+            ? `${API_BASE}/api/v1/proposals/${mongoId}/accept`
+            : `${API_BASE}/api/v1/proposals/${mongoId}/reject`;
+
+    const res = await fetch(endpoint, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
     });
 
-    const json = await res.json();
-
-    if (!res.ok || json?.success === false) {
-      throw new Error(json?.message || "Failed to save vote in DB");
+    if (!res.ok) {
+      const json = await res.json().catch(() => null);
+      throw new Error(json?.message || "Failed to store vote in DB");
     }
 
-    setIsSavingVote(false);
-    return json;
+    return res.json();
   };
 
-  // Full vote handler (on-chain + DB)
+  // ✅ Vote handler: on-chain + DB update
   const handleVote = async (support) => {
     try {
-      if (!proposalIdInput) throw new Error("Enter/select an on-chain proposal ID.");
-      if (!selectedMongoProposalId) throw new Error("Select proposal from list (MongoDB id missing).");
-      if (!address) throw new Error("Connect wallet first.");
+      setVoteMsg("");
 
-      // 1) On-chain vote (support: 1 = For, 0 = Against)
-      await voteAsync({
+      if (!proposalIdInput) {
+        setVoteMsg("Please paste/select a proposal ID.");
+        return;
+      }
+
+      // If user typed manually, map onChainProposalId -> mongo _id
+      let mongoId = selectedMongoProposalId;
+      if (!mongoId) {
+        const match = proposals.find((p) => String(p.onChainProposalId) === String(proposalIdInput));
+        mongoId = match?._id || null;
+      }
+
+      if (!mongoId) {
+        setVoteMsg("Please select a proposal from the list so vote can be stored in database.");
+        return;
+      }
+
+      // 1) Cast vote on-chain
+      await vote({
         address: GOVERNOR_ADDRESS,
         abi: GOVERNOR_ABI,
-        functionName: "castVote",
+        functionName: 'castVote',
         args: [BigInt(proposalIdInput), support],
       });
 
-      // 2) Store in MongoDB
-      await saveVoteToDb(support === 1);
+      // 2) Store in DB
+      await updateVoteInDb(mongoId, support);
 
-      alert("✅ Vote cast on-chain + stored in DB");
+      setVoteMsg("✅ Vote recorded on-chain + stored in database.");
+
+      // Refresh proposals list to update counts
+      fetchProposals();
     } catch (e) {
       console.error(e);
-      alert(e?.message || "Vote failed");
-    } finally {
-      setIsSavingVote(false);
+      setVoteMsg(e?.message || "❌ Vote failed.");
     }
   };
 
   return (
-      <div className="space-y-8">
+      <div className="space-y-8 animate-in fade-in duration-500">
+
+        {/* 1. STATUS BANNER */}
+        {isOverdue ? (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="bg-red-100 p-3 rounded-full text-red-600">
+                  <AlertOctagon size={32} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-red-800">Voting Privileges Suspended</h2>
+                  <p className="text-red-600">You have outstanding maintenance dues.</p>
+                </div>
+              </div>
+              <Link
+                  to="/pay"
+                  className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition"
+              >
+                Pay Dues Now
+              </Link>
+            </div>
+        ) : (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3 text-emerald-800">
+              <ShieldCheck className="text-emerald-600" size={24} />
+              <span className="font-bold">Account Active • Voting Enabled</span>
+            </div>
+        )}
+
         {/* Stats Row */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Treasury Card */}
-          <div className="bg-maroon-900 text-white rounded-2xl p-8 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
-              <div className="w-40 h-40 bg-white rounded-full"></div>
+          <div className="bg-gradient-to-br from-maroon-800 to-maroon-900 text-white rounded-2xl p-8 shadow-lg relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex justify-between mb-1">
+                <h2 className="text-maroon-200 font-medium">Community Treasury</h2>
+                <button
+                    onClick={() => refetch()}
+                    className="p-1 hover:bg-white/10 rounded-full"
+                >
+                  <RefreshCw size={16} className={(isLoading || isRefetching) ? "animate-spin" : ""} />
+                </button>
+              </div>
+
+              <div className="text-4xl font-bold">
+                {isLoading ? "Syncing..." : `${treasuryBal?.formatted?.slice(0, 8) || "0.00"}`}
+                <span className="text-lg opacity-60 ml-2">ETH</span>
+              </div>
             </div>
-            <h2 className="text-maroon-200 font-medium mb-1">Treasury Balance</h2>
-            <div className="text-4xl font-bold">
-              {treasuryBal
-                  ? `${Number(treasuryBal.formatted).toFixed(4)} ${treasuryBal.symbol}`
-                  : "..."}
-            </div>
-            <p className="text-maroon-300 text-sm mt-4">
-              Safe Address: {TIMELOCK_ADDRESS.slice(0, 6)}...{TIMELOCK_ADDRESS.slice(-4)}
-            </p>
           </div>
 
-          {/* User Stats Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+          {/* Voting Power */}
+          <div className="bg-white border border-maroon-100 rounded-2xl p-8 shadow-sm">
             <h2 className="text-gray-500 font-medium mb-1">Your Voting Power</h2>
             <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-gray-900">
-              {votes ? Number(votes) / 1e18 : "0"}
+            <span className="text-4xl font-bold text-maroon-900">
+              {votes ? (Number(votes) / 1e18).toFixed(2) : '0.00'}
             </span>
-              <span className="text-gray-400">Votes</span>
+              <span className="text-maroon-600 font-medium">SBT</span>
             </div>
 
             <button
-                onClick={() =>
-                    delegate({
-                      address: TOKEN_ADDRESS,
-                      abi: TOKEN_ABI,
-                      functionName: "delegate",
-                      args: address ? [address] : [],
-                    })
-                }
+                onClick={() => delegate({ address: TOKEN_ADDRESS, abi: TOKEN_ABI, functionName: 'delegate', args: [address] })}
                 disabled={isDelegating || !address}
-                className="mt-6 w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition disabled:opacity-50"
+                className="mt-6 w-full py-3 bg-maroon-50 text-maroon-800 rounded-xl font-bold border border-maroon-200 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {isDelegating ? "Activating..." : "Activate Voting Power (Delegate)"}
+              {isDelegating && <Loader2 size={18} className="animate-spin" />}
+              {isDelegating ? 'Activating...' : 'Activate Voting Power'}
             </button>
           </div>
         </div>
 
-        {/* Governance Section */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-maroon-900 mb-6">Governance Actions</h3>
-
-          {/* Search Proposal to Vote */}
-          <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Find Proposal by On-chain ID
-            </label>
-
-            <div className="flex gap-4">
-              <input
-                  type="text"
-                  placeholder="Paste on-chain proposal ID (uint256)"
-                  value={proposalIdInput}
-                  onChange={(e) => setProposalIdInput(e.target.value)}
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-maroon-900 focus:outline-none"
-              />
-            </div>
-
-            {/* Show selected mongo info */}
-            {selectedMongoProposalId && (
-                <p className="text-xs text-gray-500 mt-2">
-                  Selected Mongo Proposal ID:{" "}
-                  <span className="font-mono">{selectedMongoProposalId}</span>
-                </p>
-            )}
-
-            {proposalIdInput && (
-                <div className="mt-4 flex gap-3">
-                  <button
-                      onClick={() => handleVote(1)}
-                      disabled={isVoting || isSavingVote || !selectedMongoProposalId}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium disabled:opacity-50"
-                  >
-                    {isVoting || isSavingVote ? "Voting..." : "Vote For"}
-                  </button>
-
-                  <button
-                      onClick={() => handleVote(0)}
-                      disabled={isVoting || isSavingVote || !selectedMongoProposalId}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium disabled:opacity-50"
-                  >
-                    {isVoting || isSavingVote ? "Voting..." : "Vote Against"}
-                  </button>
-                </div>
-            )}
-
-            {!selectedMongoProposalId && (
-                <p className="text-xs text-orange-600 mt-3">
-                  ⚠️ Select a proposal from the list below first (so vote can be stored in DB).
-                </p>
-            )}
+        {/* Voting Section */}
+        <div className={`bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden ${isOverdue ? 'opacity-60 grayscale' : ''}`}>
+          <div className="border-b border-gray-100 p-6 flex justify-between bg-gray-50">
+            <h3 className="text-xl font-bold text-maroon-900">Cast Your Vote</h3>
+            {isOverdue && <Lock size={20} className="text-gray-400" />}
           </div>
 
-          {/* Proposals from MongoDB */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
-                Recent Activity
-              </h4>
+          <div className="p-6">
+            <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <Search size={16} /> Paste Proposal ID
+            </label>
 
-              <button
-                  onClick={fetchProposals}
-                  className="text-sm font-bold text-maroon-900 hover:underline"
-              >
-                Refresh
-              </button>
-            </div>
+            <input
+                type="text"
+                placeholder="0x..."
+                value={proposalIdInput}
+                onChange={(e) => {
+                  setSelectedMongoProposalId(null);
+                  setProposalIdInput(e.target.value);
+                }}
+                disabled={isOverdue}
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-maroon-600 outline-none mb-4"
+            />
 
-            {loadingProposals && <p className="text-gray-500 text-sm">Loading proposals...</p>}
-            {proposalError && <p className="text-red-600 text-sm">{proposalError}</p>}
-
-            {!loadingProposals && !proposalError && proposals.length === 0 && (
-                <p className="text-gray-500 text-sm">No proposals found.</p>
+            {!!voteMsg && (
+                <p className="text-sm mb-3 text-gray-700">{voteMsg}</p>
             )}
 
-            <div className="space-y-3">
-              {proposals.map((p) => (
-                  <div
-                      key={p._id}
-                      className={`flex items-center justify-between p-4 border rounded-xl ${
-                          selectedMongoProposalId === p._id
-                              ? "border-maroon-900 bg-gray-50"
-                              : "border-gray-100"
-                      }`}
-                  >
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{p.title}</p>
-                      <p className="text-sm text-gray-500 truncate">{p.description}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Accept: {p.acceptCount ?? 0} | Reject: {p.rejectCount ?? 0}
-                      </p>
-                      {p.onChainProposalId ? (
-                          <p className="text-xs text-gray-400 mt-1">
-                            On-chain ID:{" "}
-                            <span className="font-mono">{p.onChainProposalId}</span>
-                          </p>
-                      ) : (
-                          <p className="text-xs text-red-500 mt-1">
-                            Missing onChainProposalId (cannot vote on-chain)
-                          </p>
-                      )}
-                    </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                  onClick={() => handleVote(1)}
+                  disabled={isVoting || isOverdue || !proposalIdInput}
+                  className="bg-emerald-600 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 flex items-center justify-center gap-2"
+              >
+                {isVoting && <Loader2 size={18} className="animate-spin" />} Approve
+              </button>
 
-                    <div className="flex gap-2">
-                      <button
-                          onClick={() => {
-                            setSelectedMongoProposalId(p._id);
-                            setProposalIdInput(p.onChainProposalId || "");
-                          }}
-                          className="text-maroon-900 text-sm font-bold hover:underline whitespace-nowrap"
-                      >
-                        Select
-                      </button>
-                    </div>
-                  </div>
-              ))}
+              <button
+                  onClick={() => handleVote(0)}
+                  disabled={isVoting || isOverdue || !proposalIdInput}
+                  className="bg-red-600 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 flex items-center justify-center gap-2"
+              >
+                {isVoting && <Loader2 size={18} className="animate-spin" />} Reject
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Proposals from MongoDB */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <BarChart3 size={16} /> Recent Activity
+          </h4>
+
+          {loadingProposals && <p className="text-gray-500 text-sm italic">Fetching proposals...</p>}
+          {proposalError && <p className="text-red-600 text-sm">Error: {proposalError}</p>}
+          {!loadingProposals && proposals.length === 0 && <p className="text-gray-500 text-sm">No activity found.</p>}
+
+          <div className="divide-y divide-gray-100">
+            {proposals.map((p) => (
+                <div key={p._id} className="flex items-center justify-between py-4 group">
+                  <div className="min-w-0 pr-4">
+                    <p className="font-bold text-gray-900 truncate">{p.title}</p>
+                    <p className="text-sm text-gray-500 line-clamp-1">{p.description}</p>
+                    <div className="flex gap-3 mt-1">
+                      <span className="text-xs text-emerald-600 font-medium">For: {p.acceptCount || 0}</span>
+                      <span className="text-xs text-red-600 font-medium">Against: {p.rejectCount || 0}</span>
+                    </div>
+                  </div>
+
+                  <button
+                      onClick={() => {
+                        setSelectedMongoProposalId(p._id);
+                        setProposalIdInput(p.onChainProposalId || "");
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="bg-maroon-50 text-maroon-900 px-4 py-2 rounded-lg text-sm font-bold hover:bg-maroon-100 transition whitespace-nowrap"
+                  >
+                    Use ID
+                  </button>
+                </div>
+            ))}
+          </div>
+        </div>
+
       </div>
   );
 }

@@ -1,60 +1,55 @@
-import { BrowserRouter, createBrowserRouter, RouterProvider, Routes,Route } from 'react-router-dom';
+import React from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+
+// Internal Imports
+import { config } from './components/walletButton';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
 import { Dashboard } from './pages/Dashboard';
 import { RaiseProposal } from './pages/RaiseProposal';
 import { PayDues } from './pages/PayDues';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
-import { config } from './components/walletButton';
-import Header from './components/Header';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
-// ... Imports for Wagmi Providers (same as before) ...
 
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <Layout />,
-//     children: [
-//       { index: true, element: <Landing /> },
-//       { path: "dashboard", element: <Dashboard /> },
-//       { path: "propose", element: <RaiseProposal /> },
-//       { path: "pay", element: <PayDues /> },
-//     ],
-//   },
-// ]);
+// 1. Initialize QueryClient OUTSIDE the component to prevent resets
+const queryClient = new QueryClient();
+
+// 2. Define ALL routes here (Consolidated)
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />, // This wraps your pages with the Navbar/Footer
+    children: [
+      { index: true, element: <Landing /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "propose", element: <RaiseProposal /> },
+      { path: "pay", element: <PayDues /> },
+    ],
+  },
+  // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+  },
+]);
 
 function App() {
-  const queryClient=new QueryClient();
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-         
-          
-    
-          <BrowserRouter>
-          <Header/>
-          
-           
-            <Routes>
-              <Route path="signup" element={<Signup/>}/>
-              
-              <Route path="login" element={<Login/>}/>
-              <Route path="/" element={<Landing/>}/>
-              <Route path="/payfess"  element={<PayDues/>}/>
-              <Route path="/dashboard" element={<Dashboard/>}/>
-              <Route path="/raiseproposal" element={<RaiseProposal/>}/>
-
-            </Routes>
-          </BrowserRouter>
+          {/* The RouterProvider handles all navigation */}
+          <RouterProvider router={router} />
         </RainbowKitProvider>
-          
       </QueryClientProvider>
     </WagmiProvider>
-
   );
 }
 
