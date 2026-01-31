@@ -16,15 +16,15 @@ export const registerUser = asyncHandler(async (req, res) => {
   console.log("Request body:", req.body);
   
   const { email, username, password, walletAddress, HouseNo } = req.body;
-  
-  
- 
-  
-  
-  if (!email || !username || !password || !walletAddress || !HouseNo) {
-    console.log("Validation failed - missing fields");
+
+
+
+
+
+  if (!email || !username || !password || !walletAddress?.trim() || HouseNo == null) {
     throw new ApiError(400, "All fields are required");
   }
+
 
   
   const exists = await User.findOne({ $or: [{ email }, { username }] });

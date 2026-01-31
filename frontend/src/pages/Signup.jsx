@@ -19,7 +19,7 @@ export const Signup = () => {
     const { name, value } = e.target;
     
     const finalValue = name === "HouseNo" ? (value ? parseInt(value) : "") : value;
-    setForm({ ...form, [name]: finalValue });
+    setForm((prev) => ({ ...prev, [name]: finalValue }));
     setError("");
   };
 
@@ -36,6 +36,7 @@ export const Signup = () => {
 
     
     try {
+      console.log(form, form.walletAddress)
       const response = await registerUser(form);
       console.log("Registration successful:", response);
       navigate("/login");
