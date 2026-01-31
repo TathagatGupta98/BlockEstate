@@ -2,23 +2,26 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 // Internal Imports
-import { config } from './config';
+import { config } from './components/walletButton';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
 import { Dashboard } from './pages/Dashboard';
 import { RaiseProposal } from './pages/RaiseProposal';
 import { PayDues } from './pages/PayDues';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
 
-// Initialize the Query Client for TanStack Query
+// 1. Initialize QueryClient OUTSIDE the component to prevent resets
 const queryClient = new QueryClient();
 
-// Define your routes
+// 2. Define ALL routes here (Consolidated)
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <Layout />, // This wraps your pages with the Navbar/Footer
     children: [
       { index: true, element: <Landing /> },
       { path: "dashboard", element: <Dashboard /> },
@@ -26,16 +29,25 @@ const router = createBrowserRouter([
       { path: "pay", element: <PayDues /> },
     ],
   },
+  // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+  },
 ]);
 
 function App() {
-  const queryClient=new QueryClient();
   return (
     <WagmiProvider config={config}>
-      {/* 2. QueryClientProvider is required for Wagmi v2 hooks like useBalance */}
       <QueryClientProvider client={queryClient}>
-        {/* 3. RouterProvider handles the multi-page navigation */}
-        <RouterProvider router={router} />
+        <RainbowKitProvider>
+          {/* The RouterProvider handles all navigation */}
+          <RouterProvider router={router} />
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

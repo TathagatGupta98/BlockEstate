@@ -21,7 +21,8 @@ const proposal=new mongoose.Schema({
         required:true,
     },
     contractId:{
-        type:String
+        type:String,
+        
     },
     status:{
         type:Boolean,
