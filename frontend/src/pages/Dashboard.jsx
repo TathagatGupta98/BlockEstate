@@ -2,39 +2,52 @@ import { useBalance, useReadContract, useWriteContract, useAccount } from 'wagmi
 import { TIMELOCK_ADDRESS, GOVERNOR_ADDRESS, GOVERNOR_ABI, TOKEN_ADDRESS, TOKEN_ABI } from '../abis';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Search, AlertOctagon, Lock, Loader2, RefreshCw } from 'lucide-react';
-import { getAddress } from 'viem';
+import { ShieldCheck, Search, AlertOctagon, Lock, Loader2, RefreshCw, BarChart3 } from 'lucide-react';
+
+const API_BASE = "http://localhost:8000";
 
 export function Dashboard() {
   const { address } = useAccount();
   const [proposalIdInput, setProposalIdInput] = useState('');
   const [isOverdue, setIsOverdue] = useState(true); 
 
+  const [proposals, setProposals] = useState([]);
+  const [loadingProposals, setLoadingProposals] = useState(false);
+  const [proposalError, setProposalError] = useState(null);
+
+  // Fetch Proposals from MongoDB
+  useEffect(() => {
+    const fetchProposals = async () => {
+      try {
+        setLoadingProposals(true);
+        setProposalError(null);
+        const res = await fetch(`${API_BASE}/api/v1/proposals`);
+        const json = await res.json();
+        setProposals(json?.data || []);
+      } catch (err) {
+        setProposalError(err?.message || "Failed to fetch proposals");
+      } finally {
+        setLoadingProposals(false);
+      }
+    };
+    fetchProposals();
+  }, []);
+
+  // Check Maintenance Status
   useEffect(() => {
     const lastPayment = localStorage.getItem('lastMaintenancePayment');
     if (lastPayment) {
       const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-      const timeSincePayment = Date.now() - parseInt(lastPayment);
-      if (timeSincePayment < thirtyDaysInMs) {
+      if (Date.now() - parseInt(lastPayment) < thirtyDaysInMs) {
         setIsOverdue(false); 
       }
     }
   }, []);
 
-  // Updated useBalance with refetch capability
-  const { 
-    data: treasuryBal, 
-    isError, 
-    isLoading, 
-    refetch,
-    isRefetching 
-  } = useBalance({
+  const { data: treasuryBal, isLoading, refetch, isRefetching } = useBalance({
     address: TIMELOCK_ADDRESS,
     chainId: 11155111,
-    query: {
-      refetchInterval: 5000, 
-      staleTime: 0 
-    }
+    query: { refetchInterval: 5000, staleTime: 0 }
   });
 
   const { data: votes } = useReadContract({
@@ -43,16 +56,6 @@ export function Dashboard() {
 
   const { writeContract: delegate, isPending: isDelegating } = useWriteContract();
   const { writeContract: vote, isPending: isVoting } = useWriteContract();
-
-  // Helper to format balance safely
-  const formatBalance = (data) => {
-    if (!data) return "0.0000";
-    const parsed = parseFloat(data.formatted);
-    return isNaN(parsed) ? "0.0000" : parsed.toLocaleString(undefined, {
-      minimumFractionDigits: 4, 
-      maximumFractionDigits: 4
-    });
-  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -66,59 +69,34 @@ export function Dashboard() {
             </div>
             <div>
               <h2 className="text-xl font-bold text-red-800">Voting Privileges Suspended</h2>
-              <p className="text-red-600">You have outstanding maintenance dues. You cannot vote until resolved.</p>
+              <p className="text-red-600">You have outstanding maintenance dues.</p>
             </div>
           </div>
-          <Link to="/pay" className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition whitespace-nowrap">
+          <Link to="/pay" className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition">
             Pay Dues Now
           </Link>
         </div>
       ) : (
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3 text-emerald-800">
-          <ShieldCheck className="fill-emerald-100 text-emerald-600" size={24} />
-          <span className="font-bold">Account in Good Standing</span>
-          <span className="text-sm opacity-75">• Voting Enabled</span>
+          <ShieldCheck className="text-emerald-600" size={24} />
+          <span className="font-bold">Account Active • Voting Enabled</span>
         </div>
       )}
 
       {/* Stats Row */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Treasury Card */}
-        <div className="bg-gradient-to-br from-maroon-800 to-maroon-900 text-white rounded-2xl p-8 shadow-lg shadow-maroon-100 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-maroon-800 to-maroon-900 text-white rounded-2xl p-8 shadow-lg relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex justify-between items-start mb-1">
+            <div className="flex justify-between mb-1">
               <h2 className="text-maroon-200 font-medium">Community Treasury</h2>
-              <button 
-                onClick={() => refetch()} 
-                className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                title="Force Refresh"
-              >
+              <button onClick={() => refetch()} className="p-1 hover:bg-white/10 rounded-full">
                 <RefreshCw size={16} className={(isLoading || isRefetching) ? "animate-spin" : ""} />
               </button>
             </div>
-            
             <div className="text-4xl font-bold">
-              {isLoading ? (
-                <span className="opacity-50">Syncing...</span>
-              ) : (
-                // Direct access to formatted string to bypass Number conversion if it's failing
-                `${treasuryBal?.formatted?.slice(0, 8) || "0.00"}`
-              )} 
+              {isLoading ? "Syncing..." : `${treasuryBal?.formatted?.slice(0, 8) || "0.00"}`} 
               <span className="text-lg opacity-60 ml-2">ETH</span>
-            </div>
-
-            <div className="mt-6 flex items-center gap-2">
-              <div className="text-maroon-300 text-xs font-mono bg-maroon-950/30 px-2 py-1 rounded">
-                {TIMELOCK_ADDRESS}
-              </div>
-              {/* Visual confirmation that we are connected to the right address */}
-              <a 
-                href={`https://sepolia.etherscan.io/address/${TIMELOCK_ADDRESS}`}
-                target="_blank"
-                className="text-[10px] uppercase font-bold text-maroon-400 hover:text-white underline"
-              >
-                View on Explorer
-              </a>
             </div>
           </div>
         </div>
@@ -135,7 +113,7 @@ export function Dashboard() {
           <button 
             onClick={() => delegate({ address: TOKEN_ADDRESS, abi: TOKEN_ABI, functionName: 'delegate', args: [address] })}
             disabled={isDelegating}
-            className="mt-6 w-full py-3 bg-maroon-50 hover:bg-maroon-100 text-maroon-800 rounded-xl font-bold transition border border-maroon-200 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="mt-6 w-full py-3 bg-maroon-50 text-maroon-800 rounded-xl font-bold border border-maroon-200 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isDelegating && <Loader2 size={18} className="animate-spin" />}
             {isDelegating ? 'Activating...' : 'Activate Voting Power'}
@@ -144,43 +122,80 @@ export function Dashboard() {
       </div>
 
       {/* Voting Section */}
-      <div className={`bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden transition-all ${isOverdue ? 'opacity-60 grayscale' : ''}`}>
-        <div className="border-b border-gray-100 p-6 flex justify-between items-center bg-gray-50">
+      <div className={`bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden ${isOverdue ? 'opacity-60 grayscale' : ''}`}>
+        <div className="border-b border-gray-100 p-6 flex justify-between bg-gray-50">
           <h3 className="text-xl font-bold text-maroon-900">Cast Your Vote</h3>
           {isOverdue && <Lock size={20} className="text-gray-400" />}
         </div>
         
         <div className="p-6">
           <label className="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-            <Search size={16} /> Enter Proposal ID
+            <Search size={16} /> Paste Proposal ID
           </label>
           <input 
             type="text" 
-            placeholder="Paste ID from Etherscan..."
+            placeholder="0x..."
             value={proposalIdInput}
             onChange={(e) => setProposalIdInput(e.target.value)}
             disabled={isOverdue}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-maroon-600 focus:outline-none mb-4 outline-none"
+            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-maroon-600 outline-none mb-4"
           />
 
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={() => vote({ address: GOVERNOR_ADDRESS, abi: GOVERNOR_ABI, functionName: 'castVote', args: [BigInt(proposalIdInput), 1] })}
               disabled={isVoting || isOverdue || !proposalIdInput}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              className="bg-emerald-600 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 flex items-center justify-center gap-2"
             >
                {isVoting && <Loader2 size={18} className="animate-spin" />} Approve
             </button>
             <button 
               onClick={() => vote({ address: GOVERNOR_ADDRESS, abi: GOVERNOR_ABI, functionName: 'castVote', args: [BigInt(proposalIdInput), 0] })}
               disabled={isVoting || isOverdue || !proposalIdInput}
-              className="bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              className="bg-red-600 text-white py-3 rounded-xl font-bold disabled:bg-gray-300 flex items-center justify-center gap-2"
             >
                {isVoting && <Loader2 size={18} className="animate-spin" />} Reject
             </button>
           </div>
         </div>
       </div>
+
+      {/* Proposals from MongoDB */}
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <BarChart3 size={16} /> Recent Activity
+        </h4>
+
+        {loadingProposals && <p className="text-gray-500 text-sm italic">Fetching proposals...</p>}
+        {proposalError && <p className="text-red-600 text-sm">Error: {proposalError}</p>}
+        {!loadingProposals && proposals.length === 0 && <p className="text-gray-500 text-sm">No activity found.</p>}
+
+        <div className="divide-y divide-gray-100">
+          {proposals.map((p) => (
+            <div key={p._id} className="flex items-center justify-between py-4 group">
+              <div className="min-w-0 pr-4">
+                <p className="font-bold text-gray-900 truncate">{p.title}</p>
+                <p className="text-sm text-gray-500 line-clamp-1">{p.description}</p>
+                <div className="flex gap-3 mt-1">
+                  <span className="text-xs text-emerald-600 font-medium">For: {p.acceptCount || 0}</span>
+                  <span className="text-xs text-red-600 font-medium">Against: {p.rejectCount || 0}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                   setProposalIdInput(p.onChainProposalId || "");
+                   window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="bg-maroon-50 text-maroon-900 px-4 py-2 rounded-lg text-sm font-bold hover:bg-maroon-100 transition whitespace-nowrap"
+              >
+                Use ID
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
