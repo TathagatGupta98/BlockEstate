@@ -9,9 +9,7 @@ import App from './App.jsx'
 const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
+  <React.StrictMode>
         <App />
-      </QueryClientProvider>
-    </WagmiProvider>
+  </React.StrictMode>,
 )
