@@ -11,7 +11,7 @@ const company = new mongoose.Schema({
   verified: {
     type: String,
     enum: ["pending", "verified", "rejected"],
-    default: "pending"
+    default: "verified"
   },
 }, { timestamps: true });
 
