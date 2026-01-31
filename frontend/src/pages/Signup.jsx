@@ -2,6 +2,7 @@ import { useState } from "react";
 import { registerUser } from "../services/auth";
 import { useNavigate } from "react-router-dom";
 
+
 export const Signup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
