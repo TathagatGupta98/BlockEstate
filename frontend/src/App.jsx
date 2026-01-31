@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { config } from './components/walletButton';
 import Header from './components/Header';
-
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 // ... Imports for Wagmi Providers (same as before) ...
 
 // const router = createBrowserRouter([
@@ -29,11 +29,16 @@ function App() {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-         {/* <Header/> */}
+        <RainbowKitProvider>
+         
+          
     
           <BrowserRouter>
+          <Header/>
+          
            
             <Routes>
+            
               <Route path="/" element={<Landing/>}/>
               <Route path="/payfess"  element={<PayDues/>}/>
               <Route path="/dashboard" element={<Dashboard/>}/>
@@ -41,6 +46,8 @@ function App() {
 
             </Routes>
           </BrowserRouter>
+        </RainbowKitProvider>
+          
       </QueryClientProvider>
     </WagmiProvider>
 
