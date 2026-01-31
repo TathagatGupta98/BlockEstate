@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {API} from "../services/auth.js";
+import API from "../services/auth.js";
 
 export default function Companies() {
 
