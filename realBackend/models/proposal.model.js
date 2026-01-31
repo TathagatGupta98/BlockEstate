@@ -37,6 +37,11 @@ const proposal=new mongoose.Schema({
         type:Number,
         default:0
     },
+    status_stage:{
+        type:String,
+        enum:["stage-1","stage-2","stage-3","completed"],
+        default:"stage-1"
+    },  
     onChainProposalId: { type: String },
     txHash: { type: String }, // optional
 

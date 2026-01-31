@@ -20,7 +20,7 @@ contract HousingGovernor is Governor, GovernorSettings, GovernorCountingSimple, 
             0        /* Proposal Threshold: Minimum votes required to create a proposal (0 = anyone can propose) */
         )
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4) 
+        GovernorVotesQuorumFraction(0) 
         GovernorTimelockControl(_timelock)
     {}
 

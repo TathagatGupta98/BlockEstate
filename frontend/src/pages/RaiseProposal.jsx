@@ -41,6 +41,7 @@ export function RaiseProposal() {
           status: true,
           onChainProposalId: proposalId,
           txHash: String(txHash),
+          status_stage: "stage-1",
         }),
       });
 
@@ -64,8 +65,6 @@ export function RaiseProposal() {
           const newId = logs[0].args.proposalId.toString();
 
           setCreatedProposalId(newId);
-
-          // ✅ ADD THIS ONLY
           saveToBackend(newId);
         }
       } catch (err) {
