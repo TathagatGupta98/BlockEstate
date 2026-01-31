@@ -13,6 +13,8 @@ import { RaiseProposal } from './pages/RaiseProposal';
 import { PayDues } from './pages/PayDues';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { CompanyDashboard } from './pages/company/CompanyDashboard';
+import { CompanyBid } from './pages/company/CompanyBid';
 
 // 1. Initialize QueryClient OUTSIDE the component to prevent resets
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> },
       { path: "propose", element: <RaiseProposal /> },
       { path: "pay", element: <PayDues /> },
+      { path: "company/dashboard", element: <CompanyDashboard /> },
+      { path: "company/bid/:id", element: <CompanyBid /> },
     ],
   },
   // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
