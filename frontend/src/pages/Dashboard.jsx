@@ -1,11 +1,42 @@
 import { useBalance, useReadContract, useWriteContract, useAccount } from 'wagmi';
 import { TIMELOCK_ADDRESS, GOVERNOR_ADDRESS, GOVERNOR_ABI, TOKEN_ADDRESS, TOKEN_ABI } from '../abis';
 import { useState } from 'react';
+import { useEffect } from 'react';
+
+
+const API_BASE = "http://localhost:8000";
 
 export function Dashboard() {
   const { address } = useAccount();
   const [proposalIdInput, setProposalIdInput] = useState('');
-  
+
+  const [proposals, setProposals] = useState([]);
+  const [loadingProposals, setLoadingProposals] = useState(false);
+  const [proposalError, setProposalError] = useState(null);
+
+  useEffect(() => {
+    const fetchProposals = async () => {
+      try {
+        setLoadingProposals(true);
+        setProposalError(null);
+
+        const res = await fetch(`${API_BASE}/api/v1/proposals`);
+        const json = await res.json();
+
+        // json.data is proposals array (ApiResponse wraps it)
+        setProposals(json?.data || []);
+      } catch (err) {
+        setProposalError(err?.message || "Failed to fetch proposals");
+      } finally {
+        setLoadingProposals(false);
+      }
+    };
+
+    fetchProposals();
+  }, []);
+
+
+
   // 1. Fetch Treasury Balance
   const { data: treasuryBal } = useBalance({ address: TIMELOCK_ADDRESS });
 
@@ -97,22 +128,62 @@ export function Dashboard() {
             </div>
           )}
         </div>
-        
-        {/* Mock list for UI demo */}
+
+        {/* Proposals from MongoDB */}
         <div className="mt-6">
-          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Recent Activity</h4>
+          <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+            Recent Activity
+          </h4>
+
+          {loadingProposals && (
+              <p className="text-gray-500 text-sm">Loading proposals...</p>
+          )}
+
+          {proposalError && (
+              <p className="text-red-600 text-sm">{proposalError}</p>
+          )}
+
+          {!loadingProposals && !proposalError && proposals.length === 0 && (
+              <p className="text-gray-500 text-sm">No proposals found.</p>
+          )}
+
           <div className="space-y-3">
-            {[1,2].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 border-b border-gray-100 last:border-0">
-                <div>
-                  <p className="font-medium text-gray-900">Proposal #{4020 + i}: Repair Gate Lights</p>
-                  <p className="text-sm text-gray-500">Status: <span className="text-green-600 font-medium">Active</span></p>
+            {proposals.map((p) => (
+                <div
+                    key={p._id}
+                    className="flex items-center justify-between p-4 border-b border-gray-100 last:border-0"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {p.title}
+                    </p>
+
+                    <p className="text-sm text-gray-500 truncate">
+                      {p.description}
+                    </p>
+
+                    <p className="text-xs text-gray-400 mt-1">
+                      Accept: {p.acceptCount ?? 0} | Reject: {p.rejectCount ?? 0}
+                    </p>
+
+                    {p.onChainProposalId && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          On-chain ID: {p.onChainProposalId}
+                        </p>
+                    )}
+                  </div>
+
+                  <button
+                      onClick={() => setProposalIdInput(p.onChainProposalId || "")}
+                      className="text-maroon-900 text-sm font-bold hover:underline whitespace-nowrap"
+                  >
+                    Use ID
+                  </button>
                 </div>
-                <button className="text-maroon-900 text-sm font-bold hover:underline">View Details</button>
-              </div>
             ))}
           </div>
         </div>
+
       </div>
     </div>
   );
