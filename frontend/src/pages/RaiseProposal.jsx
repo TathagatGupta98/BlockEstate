@@ -27,42 +27,66 @@ export function RaiseProposal() {
   });
 
   useEffect(() => {
+    const saveToBackend = async (proposalId) => {
+      console.log(proposalId, "this");
+      const res = await fetch("http://localhost:8000/api/v1/proposals/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          status: true,
+          onChainProposalId: proposalId,
+          txHash: String(txHash),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.log("Backend rejected:", data);
+      } else {
+        console.log("Saved in Mongo:", data);
+      }
+    };
     if (isConfirmed && receipt) {
       try {
         const logs = parseEventLogs({
           abi: GOVERNOR_ABI,
-          eventName: 'ProposalCreated',
+          eventName: "ProposalCreated",
           logs: receipt.logs,
         });
 
         if (logs.length > 0) {
-          const newId = logs[0].args.proposalId;
-          setCreatedProposalId(newId.toString());
+          console.log(logs, logs[0], logs[0].args.proposalId.toString())
+          const newId = logs[0].args.proposalId.toString();
+
+          setCreatedProposalId(newId);
+
+          // ✅ ADD THIS ONLY
+          saveToBackend(newId);
         }
       } catch (err) {
         console.error("Log parsing error:", err);
       }
     }
-  }, [isConfirmed, receipt]);
+  }, [isConfirmed, receipt, formData, txHash]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    const transferCalldata = encodeFunctionData({
-      abi: ERC20_TRANSFER_ABI,
-      functionName: 'transfer',
-      args: [formData.recipient, parseEther(formData.amount)]
-    });
 
     const fullDesc = `# ${formData.title}\n\n${formData.description}`;
 
     writeContract({
       address: GOVERNOR_ADDRESS,
       abi: GOVERNOR_ABI,
-      functionName: 'propose',
-      args: [[TOKEN_ADDRESS], [0], [transferCalldata], fullDesc]
+      functionName: "propose",
+      args: [[GOVERNOR_ADDRESS], [0], ["0x"], fullDesc],
     });
   };
+
 
   return (
     <div className="max-w-2xl mx-auto py-8 animate-in fade-in duration-500">

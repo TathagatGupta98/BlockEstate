@@ -4,7 +4,6 @@ const proposal=new mongoose.Schema({
     ownerId:{
         type:SchemaTypes.ObjectId,
         ref:"User",
-        required:true,
     },
     videoFile:{
         type:String,
@@ -33,7 +32,10 @@ const proposal=new mongoose.Schema({
     rejectCount:{
         type:Number,
         default:0
-    }
+    },
+    onChainProposalId: { type: String },
+    txHash: { type: String }, // optional
+
 
 
 },{timestamps:true})

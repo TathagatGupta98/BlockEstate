@@ -8,18 +8,20 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const createProposal = asyncHandler(async (req, res) => {
 
-  const { title, description, videoFile, imageFile } = req.body;
+  const { title, description, videoFile, imageFile, onChainProposalId, txHash } = req.body;
 
   if (!title || !description) {
     throw new ApiError(400, "Title and description required");
   }
 
   const proposal = await Proposal.create({
-    ownerId: req.user._id,   // coming from JWT middleware
+    // ownerId: req.user._id,   // coming from JWT middleware
     title,
     description,
     videoFile,
     imageFile,
+    onChainProposalId,
+    txHash,
     status: false
   });
 

@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/proposals", verifyJWT, proposalRoutes);
+app.use("/api/v1/proposals", proposalRoutes);
 app.use("/api/v1/bids", verifyJWT, bidRoutes);
 app.use("/api/v1/companies", companyRoutes);
 app.use("/api/v1/votes", verifyJWT, voteRoutes);
