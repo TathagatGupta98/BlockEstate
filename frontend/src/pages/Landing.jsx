@@ -3,16 +3,16 @@ import { useAccount, useConnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-
+import { Link } from 'react-router-dom';
 export function Landing() {
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const navigate = useNavigate();
 
   // Auto-redirect if already connected
-  useEffect(() => {
-    if (isConnected) navigate('/dashboard');
-  }, [isConnected, navigate]);
+  // useEffect(() => {
+  //   if (isConnected) navigate('/dashboard');
+  // }, [isConnected, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center pt-10 pb-20">
@@ -26,13 +26,14 @@ export function Landing() {
           blockchain-based governance. Vote on repairs, manage treasury funds, 
           and pay dues instantly.
         </p>
-        
+        <Link to="/dashboard">
         <button 
-          onClick={() => connect({ connector: injected() })}
+          // onClick={() => connect({ connector: injected() })}
           className="bg-maroon-900 text-white text-lg px-8 py-4 rounded-xl font-bold hover:bg-maroon-800 transition shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
         >
           Enter Resident Portal <ArrowRight />
         </button>
+        </Link>
       </div>
 
       {/* Feature Grid */}
