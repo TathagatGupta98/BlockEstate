@@ -9,6 +9,8 @@ import "../src/HousingTimelock.sol";
 contract DeployDAO is Script {
     function run() external {
         address deployer = msg.sender;
+        
+        address backendAddress = 0x31facc32768adb0b41b7a37607f7c5EdE61da32E; 
 
         vm.startBroadcast();
 
@@ -17,7 +19,6 @@ contract DeployDAO is Script {
 
         address[] memory proposers = new address[](0);
         address[] memory executors = new address[](0);
-
         HousingTimelock timelock = new HousingTimelock(1 days, proposers, executors, deployer);
         console.log("HousingTimelock deployed at:", address(timelock));
 
@@ -30,8 +31,10 @@ contract DeployDAO is Script {
 
         timelock.grantRole(proposerRole, address(governor));
         timelock.grantRole(executorRole, address(0));
-        
         timelock.revokeRole(adminRole, deployer);
+
+        token.transferOwnership(backendAddress);
+        console.log("HousingToken ownership transferred to:", backendAddress);
 
         vm.stopBroadcast();
     }

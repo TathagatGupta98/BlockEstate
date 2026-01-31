@@ -4,7 +4,7 @@ const vote=new mongoose.Schema({
     userId:{
         type:SchemaTypes.ObjectId,
         ref:"User",
-        require:true,
+        required:true,
     },
     proposalId:{
         type:SchemaTypes.ObjectId,

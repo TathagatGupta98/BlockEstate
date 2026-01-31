@@ -56,6 +56,10 @@ const router = createBrowserRouter([
       {path:"/bidpage",element:<BidPage/>},
 
       
+      { path: "company/bid/:id", element: <CompanyBid /> },
+      {path:"/votepages",element:<VotePage/>},
+      {path:"/creatCompaines",element:<CreateCompany/>},
+      {path:"/companies",element:<Companies/>}
     ],
   },
   // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
