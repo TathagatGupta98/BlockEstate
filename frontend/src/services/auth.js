@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
+
 export const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000/api/v1",
+  baseURL: `${API_BASE_URL}/api/v1`,
   withCredentials: true, // Important for cookies
   headers: {
     'Content-Type': 'application/json',
