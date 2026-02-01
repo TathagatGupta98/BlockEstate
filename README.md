@@ -520,7 +520,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
       <br />Frontend, Backend,batabase (fullstack MERN)
     </td>
      <td align="center>
-        <a href="https://github.com/uttkarshshrivastave">
+        <a href="https://github.com/uttkarshshrivastav">
         <img src="https://github.com/uttkarshshrivastave.png" width="100px;" alt=""/>
         <br/><sub><b>uttkarshshrivastave</b></sub>
      </a>
