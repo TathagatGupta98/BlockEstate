@@ -25,6 +25,10 @@ export function ProposalDetails() {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
 
+  const [consensus, setConsensus] = useState(null);
+  const [consensusLoading, setConsensusLoading] = useState(false);
+
+
   // Voting State
   const { writeContract: vote, data: txHash, isPending: isSigning } = useWriteContract();
   const { isLoading: isMining, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
@@ -83,8 +87,33 @@ export function ProposalDetails() {
         args: [BigInt(proposal.onChainProposalId), support], 
      });
   };
-  
-  useEffect(() => {
+
+  const runConsensusAgent = async () => {
+        if (!proposal?._id) return;
+
+        setConsensusLoading(true);
+        setConsensus(null);
+
+        try {
+            const res = await fetch(`${API_BASE}/ai/bids/consensus`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ proposalId: proposal._id }),
+            });
+
+            const json = await res.json();
+
+            if (!json.success) throw new Error(json.message || "Consensus failed");
+            setConsensus(json.data.result);
+        } catch (err) {
+            alert("Consensus Agent Failed: " + err.message);
+        } finally {
+            setConsensusLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
      if(isConfirmed) alert("Vote Confirmed on Chain!");
   }, [isConfirmed]);
 
@@ -178,12 +207,40 @@ export function ProposalDetails() {
                             <p className="text-indigo-900 font-medium text-sm">
                                The agent is currently reviewing {bids.length} proposals.
                             </p>
-                            <button 
-                               onClick={() => alert("Integration coming soon!")}
-                               className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-200"
-                            >
-                               Generate Recommendation
-                            </button>
+                             <button
+                                 onClick={runConsensusAgent}
+                                 disabled={consensusLoading}
+                                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg text-sm font-bold transition shadow-lg shadow-indigo-200 disabled:opacity-50"
+                             >
+                                 {consensusLoading ? "Analyzing..." : "Generate Recommendation"}
+                             </button>
+
+                             {consensus && (
+                                 <div className="mt-4 bg-white rounded-xl border border-indigo-100 p-4 text-left">
+                                     <p className="text-xs font-bold text-indigo-700 uppercase">Winner</p>
+                                     <p className="text-lg font-black text-gray-900">{consensus.winner}</p>
+
+                                     <p className="mt-3 text-xs font-bold text-indigo-700 uppercase">Explanation</p>
+                                     <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                         {consensus.explanation}
+                                     </p>
+
+                                     <p className="mt-3 text-xs font-bold text-indigo-700 uppercase">Ranking</p>
+                                     <div className="space-y-2 mt-2">
+                                         {consensus.ranking?.map((r, idx) => (
+                                             <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                 <div className="flex justify-between text-sm font-bold">
+                                                     <span>{r.contractor}</span>
+                                                     <span>Score: {r.score?.toFixed?.(2) ?? r.score}</span>
+                                                 </div>
+                                                 <div className="text-xs text-gray-500">Amount: {r.amount}</div>
+                                             </div>
+                                         ))}
+                                     </div>
+                                 </div>
+                             )}
+
+
                          </div>
                       ) : (
                          <div className="text-center text-gray-400 text-sm py-4">
