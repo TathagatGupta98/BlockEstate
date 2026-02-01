@@ -1,6 +1,15 @@
 import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Webpage() {
+  const navigation=useNavigate();
+  const handleRedienceSumbit=()=>{
+    navigation("/signup")
+
+  }
+  const handleCompaniesSumbit=()=>{
+    navigation("/creatCompaines")
+  }
   useEffect(() => {
     const sections = document.querySelectorAll(".left-section, .right-section");
 
@@ -80,12 +89,12 @@ body{font-family:'Oranienbaum',serif;height:100vh;width:100vw;overflow:hidden;ba
 @keyframes fadeInUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeInDown{from{opacity:0;transform:translate(-50%,-20px)}to{opacity:1;transform:translate(-50%,0)}}`}</style>
 
-      <div className="brand-logo">PROPOSALS</div>
+      <div className="brand-logo"></div>
 
       <div className="main-container">
         <div
           className="left-section"
-          onClick={() => (window.location.href = "company-portal.html")}
+          
         >
           <div className="section-content">
             <div className="icon-circle">
@@ -98,9 +107,9 @@ body{font-family:'Oranienbaum',serif;height:100vh;width:100vw;overflow:hidden;ba
               Discover and bid on proposals<br />from society residents
             </p>
             <a
-              href="company-portal.html"
+        
               className="enter-button"
-              onClick={e => e.stopPropagation()}
+              onClick={handleCompaniesSumbit}
             >
               Enter Portal
             </a>
@@ -111,7 +120,7 @@ body{font-family:'Oranienbaum',serif;height:100vh;width:100vw;overflow:hidden;ba
 
         <div
           className="right-section"
-          onClick={() => (window.location.href = "resident-portal.html")}
+          // onClick={() => (window.location.href = "resident-portal.html")}
         >
           <div className="section-content">
             <div className="icon-circle">
@@ -124,9 +133,9 @@ body{font-family:'Oranienbaum',serif;height:100vh;width:100vw;overflow:hidden;ba
               Submit your proposals and<br />connect with service providers
             </p>
             <a
-              href="resident-portal.html"
+              
               className="enter-button"
-              onClick={e => e.stopPropagation()}
+              onClick={handleRedienceSumbit}
             >
               Enter Portal
             </a>

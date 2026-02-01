@@ -23,6 +23,8 @@ import Companies from './pages/Compaines';
 import BidPage from './pages/BidPage';
 import CreateBid from './pages/CreateBid';
 import ProposalBids from './pages/ProposalBids';
+import Webpage from './pages/Webpage';
+import CompanyHeader from './components/CompanyHeader';
 
 
 
@@ -35,15 +37,15 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />, // This wraps your pages with the Navbar/Footer
     children: [
-      { index: true, element: <Landing /> },
+      { index: true, element: <Webpage /> },
       { path: "dashboard", element: <Dashboard /> },
       { path: "propose", element: <RaiseProposal /> },
       { path: "pay", element: <PayDues /> },
-      { path: "company/dashboard", element: <CompanyDashboard /> },
+      { path: "/company/dashboard", element: <CompanyDashboard /> },
       // { path: "company/bid/:id", element: <CompanyBid /> },
       // { path: "company/bid/:id", element: <CompanyBid /> },
       {path:"/votepages",element:<VotePage/>},
-      {path:"/creatCompaines",element:<CreateCompany/>},
+      // {path:"/creatCompaines",element:<CreateCompany/>},
       {path:"/companies",element:<Companies/>},
       {path:"/createbid",element:<CreateBid/>},
       {path:"/proposalbids",element:<ProposalBids/>},
@@ -56,21 +58,26 @@ const router = createBrowserRouter([
       {path:"/bidpage",element:<BidPage/>},
 
       
-      { path: "company/bid/:id", element: <CompanyBid /> },
+      // { path: "company/bid/:id", element: <CompanyBid /> },
       {path:"/votepages",element:<VotePage/>},
-      {path:"/creatCompaines",element:<CreateCompany/>},
+      
       {path:"/companies",element:<Companies/>}
     ],
   },
+  
   // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
   {
     path: "/login",
     element: <Login />,
   },
+  {path:"/creatCompaines",element:<CreateCompany/>},
+  
+  
   {
     path: "/signup",
     element: <Signup />,
   },
+  
 ]);
 
 function App() {
