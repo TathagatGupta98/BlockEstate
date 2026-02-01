@@ -11,6 +11,8 @@ export const API = axios.create({
 });
 //"http://localhost:8000/api/v1/users/register"
 
+console.log(API["baseURL"]);
+
 export const registerUser = async (data) => {
   console.log("Auth service - Sending registration data:", data);
   
