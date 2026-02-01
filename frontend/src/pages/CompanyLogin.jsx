@@ -28,7 +28,7 @@ export default function CompanyLogin() {
       localStorage.setItem("company", JSON.stringify(res.data.company));
 
       
-      navigate("/company/dashboard");
+      navigate("/company/dashboard_");
 
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");

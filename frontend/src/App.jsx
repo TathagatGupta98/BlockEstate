@@ -72,6 +72,7 @@ const router = createBrowserRouter([
   // {path:"/creatCompaines",element:<CreateCompany/>},
   {path:"/companyregister",element:<CompanyRegister/>},
   {path:"/companylogin",element:<CompanyLogin/>},
+  { path: "/company/dashboard_", element: <CompanyDashboard /> },
   
   
   {
