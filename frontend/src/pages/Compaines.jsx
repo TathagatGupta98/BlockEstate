@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import API from "../services/auth.js";
 
 export default function Companies() {
-  const API_BASE = "http://localhost:8000/api/v1/companies";
+  const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
+  const API_BASE = `${API}/api/v1/`;
 
 
   const [companies, setCompanies] = useState([]);
