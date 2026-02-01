@@ -48,7 +48,7 @@ const router = createBrowserRouter([
       
       // Other Pages
       { path: "votepages", element: <VotePage /> },
-      { path: "companies", element: <Companies /> },
+      { path: "/open", element: <Companies/> },
       { path: "createbid", element: <CreateBid /> },
       { path: "proposalbids", element: <ProposalBids /> },
       { path: "bidpage", element: <BidPage /> },
