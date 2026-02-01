@@ -7,7 +7,7 @@ import {
   BarChart3, Vote, Bot, Hammer, CheckCircle2 
 } from 'lucide-react';
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
 
 export function Dashboard() {
 
