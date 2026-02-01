@@ -56,7 +56,7 @@ export function Layout() {
 
                 {isConnected && (
                     <div className="hidden md:flex ml-10 space-x-8">
-                      <Link to="/dashboard" className={isActive("/dashboard")}>Overview</Link>
+                      <Link to="/Home" className={isActive("/dashboard")}>Overview</Link>
                       <Link to="/propose" className={isActive("/propose")}>Raise Proposal</Link>
                       <Link to="/pay" className={isActive("/pay")}>Pay Dues</Link>
                       <Link to="/companies" className={isActive("/companies")}>companies</Link>

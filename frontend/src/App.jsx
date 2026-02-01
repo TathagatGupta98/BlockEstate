@@ -14,9 +14,6 @@ import { PayDues } from './pages/PayDues';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { CompanyDashboard } from './pages/company/CompanyDashboard';
-// import { CompanyBid } from './pages/company/CompanyBid';
-// import { CompanyBid } from './pages/company/CompanyBid';
-// import { CompanyBid } from './pages/company/CompanyBid';
 import VotePage from './pages/VotePages';
 import CompanyRegister from './pages/CompanyRegister';
 import Companies from './pages/Compaines';
@@ -24,62 +21,45 @@ import BidPage from './pages/BidPage';
 import CreateBid from './pages/CreateBid';
 import ProposalBids from './pages/ProposalBids';
 import Webpage from './pages/Webpage';
-import CompanyHeader from './components/CompanyHeader';
 import CompanyLogin from './pages/CompanyLogin';
 
+// ✅ 1. IMPORT THE NEW PAGES
+import { DashboardHome } from './pages/DashboardHome';
+import { ProposalDetails } from './pages/ProposalDetails'; 
 
-// 1. Initialize QueryClient OUTSIDE the component to prevent resets
 const queryClient = new QueryClient();
 
-// 2. Define ALL routes here (Consolidated)
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />, // This wraps your pages with the Navbar/Footer
+    element: <Layout />,
     children: [
       { index: true, element: <Webpage /> },
-      { path: "dashboard", element: <Dashboard /> },
+
+      { path: "home", element: <DashboardHome /> },
+
+      
+      { path: "proposal/:id", element: <ProposalDetails /> },
+
+      { path: "dashboard", element: <Dashboard /> }, // Old Dashboard (keep if needed)
       { path: "propose", element: <RaiseProposal /> },
       { path: "pay", element: <PayDues /> },
-      { path: "/company/dashboard", element: <CompanyDashboard /> },
-      // { path: "company/bid/:id", element: <CompanyBid /> },
-      // { path: "company/bid/:id", element: <CompanyBid /> },
-      {path:"/votepages",element:<VotePage/>},
-      // {path:"/creatCompaines",element:<CreateCompany/>},
-      {path:"/companies",element:<Companies/>},
-      {path:"/createbid",element:<CreateBid/>},
-      {path:"/proposalbids",element:<ProposalBids/>},
-      {path:"/bidpage",element:<BidPage/>},
-
+      { path: "company/dashboard", element: <CompanyDashboard /> },
       
-      {path:"/companies",element:<Companies/>},
-      {path:"/proposalbids",element:<ProposalBids/>},
-      {path:"/bidpage",element:<BidPage/>},
-
-      
-      // { path: "company/bid/:id", element: <CompanyBid /> },
-      {path:"/votepages",element:<VotePage/>},
-      
-      {path:"/companies",element:<Companies/>}
+      // Other Pages
+      { path: "votepages", element: <VotePage /> },
+      { path: "companies", element: <Companies /> },
+      { path: "createbid", element: <CreateBid /> },
+      { path: "proposalbids", element: <ProposalBids /> },
+      { path: "bidpage", element: <BidPage /> },
     ],
   },
   
-  // Auth pages usually don't need the main Layout (Navbar), so we keep them separate
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  // {path:"/creatCompaines",element:<CreateCompany/>},
-  {path:"/companyregister",element:<CompanyRegister/>},
-  {path:"/companylogin",element:<CompanyLogin/>},
-  { path: "/company/dashboard_", element: <CompanyDashboard /> },
-  
-  
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
-  
+  // Auth Pages (No Navbar)
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
+  { path: "/companyregister", element: <CompanyRegister /> },
+  { path: "/companylogin", element: <CompanyLogin /> },
 ]);
 
 function App() {
