@@ -79,6 +79,12 @@ export default function CompanyRegister() {
           {loading ? "Registering..." : "Register"}
         </button>
       </form>
+       <p className="mt-4 text-center text-sm">
+        Already have an account?{" "}
+        <a href="/companylogin" className="text-blue-600 hover:underline">
+          Login
+        </a>
+      </p>
     </div>
   );
 }

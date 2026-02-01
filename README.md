@@ -500,7 +500,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 - Blockchain Lead - Tathagat Gupta
 - Full-Stack Developer - Mohammad Ibrahim
 - UI/UX Designer - Mohammed Wasif Ansari
-- AI Engineer - Utkarsh Shrivastav
+- AI Engineer - Uttkarsh Shrivastav
 ---
 
 ## 📊 Project Status
