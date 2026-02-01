@@ -1,4 +1,7 @@
-import { proposalUnderstandingAgent } from "../ProposalAI/agents/proposalUnderstandingAgent.js";
+import { proposalUnderstandingAgent } from "../ai/agents/proposalUnderstandingAgent.js";
+import { Bid } from "../models/bid.model.js";
+import { evaluateBids } from "../ai/index.js";
+
 
 const clamp01 = (n) => Math.max(0, Math.min(1, Number(n)));
 
@@ -44,3 +47,77 @@ export const getProposalFeasibility = async (req, res, next) => {
         next(err);
     }
 };
+
+const parseAmount = (estimatedId) => {
+    // handles "5000", "₹5000", "5,000", "5000 INR"
+    const cleaned = String(estimatedId || "")
+        .replace(/,/g, "")
+        .replace(/[^\d.]/g, "");
+
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
+};
+
+export const getBidConsensus = async (req, res, next) => {
+    try {
+        const { proposalId } = req.body;
+
+        if (!proposalId) {
+            return res.status(400).json({
+                success: false,
+                message: "proposalId is required",
+            });
+        }
+
+        const bids = await Bid.find({ proposalId })
+            .populate("companyId", "name verified")
+            .lean();
+
+        if (!bids.length) {
+            return res.status(200).json({
+                success: true,
+                data: { bidsCount: 0, result: null },
+            });
+        }
+
+        // Map DB bids -> agent bids format
+        const agentBids = bids
+            .map((b) => {
+                const amount = parseAmount(b.estimatedId);
+
+                return {
+                    bidId: b._id?.toString(),
+                    contractor: b.companyId?.name || "Unknown Company",
+                    amount, // must be number
+                    description: b.description || "",
+                    meta: {
+                        companyId: b.companyId?._id?.toString(),
+                        verified: !!b.companyId?.verified,
+                    },
+                };
+            })
+            .filter((b) => b.amount !== null && b.description.trim().length > 0);
+
+        if (!agentBids.length) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Bids exist but agent could not parse amount from estimatedId. Make sure estimatedId is numeric (example: '5000').",
+            });
+        }
+
+        const result = await evaluateBids(agentBids);
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                bidsCount: bids.length,
+                analyzedCount: agentBids.length,
+                result,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
