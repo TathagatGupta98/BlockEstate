@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Building2, Hammer, Clock, CheckCircle2, ChevronRight, Wallet, X } from 'lucide-react';
 import CreateBid from '../CreateBid'; // Ensure this path matches where you saved CreateBid.jsx
 
-const API_BASE = "http://localhost:8000/api/v1";
+const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
+const API_BASE = `${API}/api/v1/`;
 
 // Mock Data for Active Jobs (Keep this static for now as requested, focus is on Proposals)
 const ACTIVE_JOBS = [
