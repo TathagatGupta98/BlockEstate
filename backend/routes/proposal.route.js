@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { 
-  createProposal, 
+import {
+  advanceProposalStage,
+  createProposal,
   getAllProposals,
   getProposalById,
-  updateProposal, 
+  updateProposal,
   deleteProposal,
-  acceptProposal, 
+  acceptProposal,
   rejectProposal,
   syncProposalStatus // <--- IMPORT THIS
 } from "../controllers/proposal.controller.js";
@@ -18,7 +19,13 @@ router.get("/:id", getProposalById);
 router.patch("/:id/accept", acceptProposal);
 router.patch("/:id/reject", rejectProposal);
 
+
 // New Route for Lazy Sync
 router.post("/:id/sync", syncProposalStatus);
+
+
+router.post("/:id/advance-stage", advanceProposalStage);
+
+
 
 export default router;

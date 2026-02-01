@@ -10,6 +10,7 @@ export default function CompanyNavbar() {
     { id: 'bids', label: 'My Bids', href: '/bids' },
     { id: 'projects', label: 'Active Projects', href: '/projects' },
     { id: 'profile', label: 'Company Profile', href: '/profile' }
+  
   ];
 
   return (
@@ -278,7 +279,9 @@ export default function CompanyNavbar() {
                 >
                   {link.label}
                 </a>
+                
               </li>
+
             ))}
             <li>
               <a href="/logout" className="navbar-cta">

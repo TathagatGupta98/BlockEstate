@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Building2, Hammer, Clock, CheckCircle2, ChevronRight, Wallet, X } from 'lucide-react';
 import CreateBid from '../CreateBid'; // Ensure this path matches where you saved CreateBid.jsx
+import { useNavigate } from 'react-router-dom';
 
 const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
 const API_BASE = `${API}/api/v1/`;
 
-// Mock Data for Active Jobs (Keep this static for now as requested, focus is on Proposals)
+// Mock Data for Active Jobs
 const ACTIVE_JOBS = [
   { 
     id: 204, 
@@ -29,17 +30,12 @@ export function CompanyDashboard() {
   
   // Modal State
   const [selectedProposal, setSelectedProposal] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // 1. Fetch User (to get Company ID) & Proposals
+  const navigate=useNavigate();
+  const handleCompainesSumbit=()=>{
+    navigate("/openCompany")
+  }
+  // 1. Fetch Proposals
   useEffect(() => {
-    // Get logged in user from local storage
-    const userStr = localStorage.getItem("user"); // Assuming you store user object here
-    if (userStr) {
-        const user = JSON.parse(userStr);
-        setCurrentUser(user);
-    }
-
     const fetchProposals = async () => {
       try {
         setLoading(true);
@@ -57,6 +53,12 @@ export function CompanyDashboard() {
 
     fetchProposals();
   }, []);
+
+  const handleBidSuccess = () => {
+    setSelectedProposal(null);
+    // Optional: Show success message or refresh data
+    alert("Bid submitted successfully!");
+  };
 
   return (
     <div className="max-w-6xl mx-auto py-8 animate-in fade-in duration-500 relative">
@@ -97,6 +99,12 @@ export function CompanyDashboard() {
         >
           Active Contracts
         </button>
+        <button
+          onClick={handleCompainesSumbit}
+          className={`pb-4 text-sm font-bold transition-colors ${activeTab === 'jobs' ? 'text-maroon-900 border-b-2 border-maroon-900' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          Compaines
+        </button>
       </div>
 
       {/* Content Area */}
@@ -131,7 +139,6 @@ export function CompanyDashboard() {
                   
                   <div className="flex flex-col items-end gap-3 min-w-[150px]">
                     <div className="text-right">
-                       {/* You can add a budget field to your schema later, for now placeholder */}
                       <p className="text-xs text-gray-400 font-bold uppercase">Proposal ID</p>
                       <p className="text-xs font-mono font-bold text-maroon-900 truncate w-24">{job.onChainProposalId?.substring(0, 8)}...</p>
                     </div>
@@ -192,7 +199,7 @@ export function CompanyDashboard() {
                 {/* Close Button */}
                 <button 
                     onClick={() => setSelectedProposal(null)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition z-10"
                 >
                     <X size={24} />
                 </button>
@@ -206,11 +213,7 @@ export function CompanyDashboard() {
                     {/* Injecting your CreateBid Component Here */}
                     <CreateBid 
                         proposalId={selectedProposal._id} 
-                        companyId={currentUser?._id} // Passing logged in user ID
-                        onSuccess={() => {
-                            setSelectedProposal(null);
-                            // Optional: Refresh proposals list or show success toast
-                        }}
+                        onSuccess={handleBidSuccess}
                     />
                 </div>
             </div>

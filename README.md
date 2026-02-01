@@ -519,14 +519,15 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
       </a>
       <br />Frontend, Backend,batabase (fullstack MERN)
     </td>
-     <td align="center>
-        <a href="https://github.com/uttkarshshrivastave">
-        <img src="https://github.com/uttkarshshrivastave.png" width="100px;" alt=""/>
-        <br/><sub><b>uttkarshshrivastave</b></sub>
-     </a>
-     <br/>ai agent ,frontend
-      
-   </td>
+        <td align="center">
+      <a href="https://github.com/uttkarshshrivastav">
+        <img src="https://github.com/uttkarshshrivastav.png" width="100px;" alt=""/>
+        <br />
+        <sub><b>uttkarshshrivastav</b></sub>
+      </a>
+      <br />
+      AI Agent, Frontend
+    </td>
   </tr>
 </table>
 
