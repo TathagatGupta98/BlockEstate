@@ -1,144 +1,154 @@
 import { Company } from "../models/company.model.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { ApiError } from "../utils/ApiError.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+/* ===========================
+   Register Company
+=========================== */
+export const registerCompany = async (req, res) => {
+  try {
+    const { name, walletAddress, password } = req.body;
 
-const generateTokens=async(company)=>{
-  const accessToken=company.generateAccessToken();
-  const refreshToken=company.generateRefreshToken();
-  company.refreshToken=refreshToken;
-  await company.save({ValidityState:false});
-  return{accessToken,refreshToken};
+    if (!name || !password) {
+      return res.status(400).json({ message: "Name and password required" });
+    }
 
-}
+    const existing = await Company.findOne({ name });
 
-// ================= CREATE =================
+    if (existing) {
+      return res.status(409).json({ message: "Company already exists" });
+    }
 
-export const createCompany = asyncHandler(async (req, res) => {
+    const company = await Company.create({
+      name,
+      walletAddress,
+      password
+    });
 
-  const { name, walletAddress } = req.body;
+    res.status(201).json({
+      message: "Company registered successfully",
+      company
+    });
 
-  if (!name) {
-    throw new ApiError(400, "Company name required");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
+};
 
-  const exists = await Company.findOne({ name });
 
-  if (exists) {
-    throw new ApiError(409, "Company already exists");
+/* ===========================
+   Login Company
+=========================== */
+export const loginCompany = async (req, res) => {
+  try {
+    const { name, password } = req.body;
+
+    const company = await Company.findOne({ name });
+
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, company.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const token = company.generateAccessToken();
+
+    res.json({
+      message: "Login successful",
+      token,
+      company
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  const company = await Company.create({
-    name,
-    walletAddress,
-    verified: "pending"   // default flow
-  });
-
-  res
-    .status(201)
-    .json(new ApiResponse(201, company, "Company created"));
-});
+};
 
 
-// ================= GET ALL =================
+/* ===========================
+   Get All Companies
+=========================== */
+export const getAllCompanies = async (req, res) => {
+  try {
+    const companies = await Company.find().select("-password");
 
-export const getAllCompanies = asyncHandler(async (req, res) => {
+    res.json(companies);
 
-  const companies = await Company.find()
-    .sort({ createdAt: -1 });
-
-  res.json(new ApiResponse(200, companies));
-});
-
-
-// ================= GET ONE =================
-
-export const getCompanyById = asyncHandler(async (req, res) => {
-
-  const { id } = req.params;
-
-  const company = await Company.findById(id);
-
-  if (!company) {
-    throw new ApiError(404, "Company not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  res.json(new ApiResponse(200, company));
-});
+};
 
 
-// ================= UPDATE =================
+/* ===========================
+   Get Company By ID
+=========================== */
+export const getCompanyById = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-export const updateCompany = asyncHandler(async (req, res) => {
+    const company = await Company.findById(id).select("-password");
 
-  const { id } = req.params;
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
 
-  const updated = await Company.findByIdAndUpdate(
-    id,
-    req.body,
-    { new: true }
-  );
+    res.json(company);
 
-  if (!updated) {
-    throw new ApiError(404, "Company not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  res.json(new ApiResponse(200, updated, "Updated"));
-});
+};
 
 
-// ================= DELETE =================
+/* ===========================
+   Update Company
+=========================== */
+export const updateCompany = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-export const deleteCompany = asyncHandler(async (req, res) => {
+    const updated = await Company.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    ).select("-password");
 
-  const { id } = req.params;
+    if (!updated) {
+      return res.status(404).json({ message: "Company not found" });
+    }
 
-  const company = await Company.findByIdAndDelete(id);
+    res.json({
+      message: "Company updated",
+      updated
+    });
 
-  if (!company) {
-    throw new ApiError(404, "Company not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  res.json(new ApiResponse(200, {}, "Deleted"));
-});
+};
 
 
-// ================= VERIFY COMPANY =================
+/* ===========================
+   Delete Company
+=========================== */
+export const deleteCompany = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-export const verifyCompany = asyncHandler(async (req, res) => {
+    const deleted = await Company.findByIdAndDelete(id);
 
-  const { id } = req.params;
+    if (!deleted) {
+      return res.status(404).json({ message: "Company not found" });
+    }
 
-  const company = await Company.findByIdAndUpdate(
-    id,
-    { verified: "verified" },
-    { new: true }
-  );
+    res.json({ message: "Company deleted successfully" });
 
-  if (!company) {
-    throw new ApiError(404, "Company not found");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  res.json(new ApiResponse(200, company, "Company verified"));
-});
-
-
-//================= UNVERIFY / REJECT =================
-
-export const rejectCompany = asyncHandler(async (req, res) => {
-
-  const { id } = req.params;
-
-  const company = await Company.findByIdAndUpdate(
-    id,
-    { verified: "rejected" },
-    { new: true }
-  );
-
-  if (!company) {
-    throw new ApiError(404, "Company not found");
-  }
-
-  res.json(new ApiResponse(200, company, "Company rejected"));
-});
+};
