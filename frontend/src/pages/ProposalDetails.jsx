@@ -4,7 +4,8 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { GOVERNOR_ADDRESS, GOVERNOR_ABI } from '../abis'; // Import your ABIs
 import { Loader2, ArrowLeft, BrainCircuit, CheckCircle, XCircle } from 'lucide-react';
 
-const API_BASE = "http://localhost:8000/api/v1";
+const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
+const API_BASE = `${API}/api/v1/`;
 
 export function ProposalDetails() {
   const { id } = useParams();
