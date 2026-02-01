@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getProposalFeasibility } from "../controllers/ai.controller.js";
+import { getProposalFeasibility, getBidConsensus } from "../controllers/ai.controller.js";
 
 const router = Router();
 
@@ -7,6 +7,8 @@ console.log("✅ AI routes mounted");
 
 // Public
 router.post("/proposal/feasibility", getProposalFeasibility);
+router.post("/bids/consensus", getBidConsensus);
+
 
 router.get("/ping", (req, res) => {
     res.json({ success: true, message: "AI route working" });

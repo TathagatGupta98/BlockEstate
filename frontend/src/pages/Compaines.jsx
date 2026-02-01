@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import API from "../services/auth.js";
 
 export default function Companies() {
+  const API_BASE = "http://localhost:8000/api/v1/companies";
+
 
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchCompanies = async () => {
     try {
-      const res = await API.get("/companies");
+      const res = await API_BASE.get("/");
       setCompanies(res.data.data);
     } catch (err) {
       alert("Failed to load companies");

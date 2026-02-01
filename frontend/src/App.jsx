@@ -44,11 +44,11 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> }, // Old Dashboard (keep if needed)
       { path: "propose", element: <RaiseProposal /> },
       { path: "pay", element: <PayDues /> },
-      { path: "company/dashboard", element: <CompanyDashboard /> },
+      
       
       // Other Pages
       { path: "votepages", element: <VotePage /> },
-      { path: "companies", element: <Companies /> },
+      { path: "/open", element: <Companies/> },
       { path: "createbid", element: <CreateBid /> },
       { path: "proposalbids", element: <ProposalBids /> },
       { path: "bidpage", element: <BidPage /> },
@@ -60,6 +60,7 @@ const router = createBrowserRouter([
   { path: "/signup", element: <Signup /> },
   { path: "/companyregister", element: <CompanyRegister /> },
   { path: "/companylogin", element: <CompanyLogin /> },
+  { path: "/company/dashboard_", element: <CompanyDashboard /> },
 ]);
 
 function App() {
