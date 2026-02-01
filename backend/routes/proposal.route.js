@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { 
+import {
   advanceProposalStage,
-  createProposal, 
+  createProposal,
   getAllProposals,
   getProposalById,
-  updateProposal, 
+  updateProposal,
   deleteProposal,
-  acceptProposal, 
+  acceptProposal,
   rejectProposal,
   syncProposalStatus // <--- IMPORT THIS
 } from "../controllers/proposal.controller.js";

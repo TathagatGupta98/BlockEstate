@@ -2,6 +2,8 @@ import { Bid } from "../models/bid.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import { Proposal } from "../models/proposal.model.js";
+
 
 
 // ================= CREATE BID =================
@@ -10,6 +12,9 @@ export const createBid = asyncHandler(async (req, res) => {
   const { proposalId, companyId, estimatedId, description } = req.body;
 
   const proposal = await Proposal.findById(proposalId);
+  if (!proposal) {
+    throw new ApiError(404, "Proposal not found");
+  }
 
   if (proposal.status_stage !== "stage-2") {
     return res.status(400).json({
@@ -50,8 +55,8 @@ export const createBid = asyncHandler(async (req, res) => {
   console.log("Bid created successfully:", bid);
 
   res
-    .status(201)
-    .json(new ApiResponse(201, bid, "Bid created"));
+      .status(201)
+      .json(new ApiResponse(201, bid, "Bid created"));
 });
 
 
@@ -62,8 +67,8 @@ export const getBidsForProposal = asyncHandler(async (req, res) => {
   const { proposalId } = req.params;
 
   const bids = await Bid.find({ proposalId })
-    .populate("companyId", "name walletAddress verified")
-    .sort({ createdAt: -1 });
+      .populate("companyId", "name walletAddress verified")
+      .sort({ createdAt: -1 });
 
   res.json(new ApiResponse(200, bids));
 });
@@ -76,7 +81,7 @@ export const getBidsByCompany = asyncHandler(async (req, res) => {
   const { companyId } = req.params;
 
   const bids = await Bid.find({ companyId })
-    .populate("proposalId", "title description status");
+      .populate("proposalId", "title description status");
 
   res.json(new ApiResponse(200, bids));
 });
@@ -89,8 +94,8 @@ export const getBidById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const bid = await Bid.findById(id)
-    .populate("companyId", "name")
-    .populate("proposalId", "title");
+      .populate("companyId", "name")
+      .populate("proposalId", "title");
 
   if (!bid) {
     throw new ApiError(404, "Bid not found");
@@ -107,9 +112,9 @@ export const updateBid = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const updated = await Bid.findByIdAndUpdate(
-    id,
-    req.body,
-    { new: true }
+      id,
+      req.body,
+      { new: true }
   );
 
   if (!updated) {
