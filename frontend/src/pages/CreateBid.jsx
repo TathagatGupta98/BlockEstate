@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import API from "../services/auth";
 
 export default function CreateBid({ proposalId, onSuccess }) {
-  const [estimatedId, setEstimatedId] = useState(""); // Match backend field name
+  const [estimatedId, setEstimatedId] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [companyId, setCompanyId] = useState(null);
@@ -44,8 +44,8 @@ export default function CreateBid({ proposalId, onSuccess }) {
       const bidData = {
         proposalId,
         companyId,
-        estimatedId, // Backend expects this field name
-        description
+        estimatedId,
+        description,
       };
 
       console.log("Submitting bid:", bidData);
@@ -54,15 +54,12 @@ export default function CreateBid({ proposalId, onSuccess }) {
 
       console.log("Bid created successfully:", response.data);
 
-      // Reset form
       setEstimatedId("");
       setDescription("");
 
-      // Call success callback
       onSuccess && onSuccess();
 
       alert("Bid created successfully!");
-
     } catch (err) {
       console.error("Error creating bid:", err);
       const errorMsg = err.response?.data?.message || "Error creating bid";
@@ -73,67 +70,80 @@ export default function CreateBid({ proposalId, onSuccess }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl space-y-4"
-    >
-      {/* 1. AUTO-FILLED PROPOSAL ID (Read Only) */}
-      <div>
-        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+      <form onSubmit={handleSubmit} className="relative bg-[#FFF7EE] p-6 rounded-2xl space-y-4">
+        {/* Wiggles */}
+        <svg
+            className="pointer-events-none absolute top-0 left-0 w-full h-14 opacity-[0.14]"
+            viewBox="0 0 800 120"
+            preserveAspectRatio="none"
+        >
+          <path
+              d="M0,60 C120,10 220,110 350,60 C480,10 580,110 800,50"
+              fill="none"
+              stroke="#D6B38C"
+              strokeWidth="10"
+          />
+        </svg>
+
+        {/* Proposal ID */}
+        <div className="pt-6">
+          <label className="block text-xs font-extrabold text-[#2B1B12]/60 uppercase tracking-wide mb-1">
             Target Proposal ID
-        </label>
-        <input
-          type="text"
-          value={proposalId || ""}
-          disabled
-          className="w-full border border-gray-200 p-3 rounded-lg bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed"
-        />
-      </div>
-
-      {/* 2. Estimated Cost/ID */}
-      <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">
-            Estimated Cost / Quote ID
-        </label>
-        <input
-            type="text"
-            required
-            placeholder="e.g. 5.5 ETH or Quote #12345"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-maroon-900 outline-none transition"
-            value={estimatedId}
-            onChange={(e) => setEstimatedId(e.target.value)}
-        />
-        <p className="text-xs text-gray-400 mt-1">Enter your bid amount or quote reference</p>
-      </div>
-
-      {/* 3. Description / Proposal */}
-      <div>
-        <label className="block text-sm font-bold text-gray-700 mb-1">
-            Execution Plan & Details
-        </label>
-        <textarea
-            required
-            placeholder="Describe how you will execute this project, timeline, and materials..."
-            className="w-full border border-gray-300 p-3 rounded-lg h-32 focus:ring-2 focus:ring-maroon-900 outline-none transition resize-none"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
-
-      {/* Company ID Status */}
-      {!companyId && (
-        <div className="bg-red-50 border border-red-200 p-3 rounded-lg text-sm text-red-700">
-          ⚠️ Company not loaded. Please ensure you're logged in.
+          </label>
+          <input
+              type="text"
+              value={proposalId || ""}
+              disabled
+              className="w-full border border-[#2B1B12]/10 p-3 rounded-xl bg-[#F4ECE2] text-[#2B1B12]/60 font-mono text-sm cursor-not-allowed"
+          />
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={loading || !companyId}
-        className="w-full bg-maroon-900 text-white font-bold py-3 rounded-xl hover:bg-maroon-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? "Submitting Bid..." : "Submit Bid"}
-      </button>
-    </form>
+        {/* Estimated Cost */}
+        <div>
+          <label className="block text-sm font-extrabold text-[#2B1B12] mb-1">
+            Estimated Cost / Quote ID
+          </label>
+          <input
+              type="text"
+              required
+              placeholder="e.g. 5.5 ETH or Quote #12345"
+              className="w-full border border-[#2B1B12]/15 p-3 rounded-xl outline-none transition focus:ring-2 focus:ring-[#D6B38C] bg-white"
+              value={estimatedId}
+              onChange={(e) => setEstimatedId(e.target.value)}
+          />
+          <p className="text-xs text-[#2B1B12]/50 mt-1 font-medium">
+            Enter your bid amount or quote reference
+          </p>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-extrabold text-[#2B1B12] mb-1">
+            Execution Plan & Details
+          </label>
+          <textarea
+              required
+              placeholder="Describe how you will execute this project, timeline, and materials..."
+              className="w-full border border-[#2B1B12]/15 p-3 rounded-xl h-32 outline-none transition focus:ring-2 focus:ring-[#D6B38C] bg-white resize-none"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
+        {/* Company ID Status */}
+        {!companyId && (
+            <div className="bg-[#2B1B12]/10 border border-[#2B1B12]/10 p-3 rounded-xl text-sm text-[#2B1B12] font-semibold">
+              ⚠️ Company not loaded. Please ensure you're logged in.
+            </div>
+        )}
+
+        <button
+            type="submit"
+            disabled={loading || !companyId}
+            className="w-full bg-[#2B1B12] text-[#FFF7EE] font-extrabold py-3 rounded-xl hover:bg-[#3B2A21] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#2B1B12]/10"
+        >
+          {loading ? "Submitting Bid..." : "Submit Bid"}
+        </button>
+      </form>
   );
 }
