@@ -1,6 +1,8 @@
 import { useState } from "react";
 import API from "../services/auth.js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import AuthShell from "../components/AuthShell";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function CompanyLogin() {
   const [form, setForm] = useState({
@@ -9,6 +11,8 @@ export default function CompanyLogin() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,24 +27,13 @@ export default function CompanyLogin() {
 
       const res = await API.post("/companies/login", form);
 
-      console.log("Login response:", res.data);
-
-      // Save token AND company data
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-      }
-
-      if (res.data.company) {
-        // Store the entire company object
+      if (res.data.token) localStorage.setItem("token", res.data.token);
+      if (res.data.company)
         localStorage.setItem("company", JSON.stringify(res.data.company));
-        console.log("Company data saved:", res.data.company);
-      }
 
       alert("Login successful!");
       navigate("/company/dashboard_");
-
     } catch (err) {
-      console.error("Login error:", err);
       alert(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -48,49 +41,81 @@ export default function CompanyLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form 
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-md w-96"
+      <AuthShell
+          title="Company Login"
+          subtitle="Secure access for verified companies on resiDAO."
+          bottomText={
+            <>
+              Don’t have an account?{" "}
+              <Link
+                  to="/companyregister"
+                  className="font-semibold text-[#6F4E37] hover:underline"
+              >
+                Register
+              </Link>
+            </>
+          }
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          Company Login
-        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#2B1B12] mb-1">
+              Company Name
+            </label>
+            <input
+                type="text"
+                name="name"
+                placeholder="Company Name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="w-full rounded-xl border border-[#2B1B12]/15 bg-[#fff7ee] px-4 py-3 text-[#2B1B12] placeholder:text-[#2B1B12]/40 focus:outline-none focus:ring-2 focus:ring-[#6F4E37]/50"
+            />
+          </div>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Company Name"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full mb-3 p-2 border rounded"
-          required
-        />
+          <div>
+            <label className="block text-sm font-medium text-[#2B1B12] mb-1">
+              Password
+            </label>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full mb-3 p-2 border rounded"
-          required
-        />
+            <div className="relative">
+              <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-xl border border-[#2B1B12]/15 bg-[#fff7ee] px-4 py-3 pr-12 text-[#2B1B12] placeholder:text-[#2B1B12]/40 focus:outline-none focus:ring-2 focus:ring-[#6F4E37]/50"
+              />
+              <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2B1B12]/50 hover:text-[#2B1B12]"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
 
-        <button
-          disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-
-        <p className="mt-4 text-center text-sm">
-          Don't have an account?{" "}
-          <a href="/companyregister" className="text-blue-600 hover:underline">
-            Register
-          </a>
-        </p>
-      </form>
-    </div>
+          <button
+              disabled={loading}
+              className={`w-full rounded-xl py-3 font-semibold text-[#2B1B12] transition
+            ${
+                  loading
+                      ? "bg-[#d6b38c]/70 cursor-not-allowed"
+                      : "bg-[#d6b38c] hover:bg-[#cfa87c] shadow-lg shadow-[#6F4E37]/20"
+              }`}
+          >
+            {loading ? (
+                <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Logging in...
+            </span>
+            ) : (
+                "Login"
+            )}
+          </button>
+        </form>
+      </AuthShell>
   );
 }
