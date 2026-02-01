@@ -33,7 +33,7 @@ A revolutionary blockchain-based platform that transforms traditional housing so
         <img src="https://github.com/TathagatGupta98.png" width="100px;" alt=""/>
         <br /><sub><b>TathagatGupta98</b></sub>
       </a>
-      <br />Smart Contract Developer
+      <br />Web3, Smart Contract Developer,frontend 
     </td>
     <td align="center">
       <a href="https://github.com/Ibrahim2750mi">
