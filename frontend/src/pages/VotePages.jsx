@@ -3,7 +3,7 @@ import axios from "axios";
 import {p} from "framer-motion/m";
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
-const API = `${API_BASE}/api/v1/`;
+const API = `${API_BASE}/api/v1`;
 export default function VotePage({ proposalId }) {
 
   const [votes, setVotes] = useState([]);

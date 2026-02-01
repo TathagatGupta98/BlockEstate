@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
-const API_BASE = `${API}/api/v1/`;
+const API_BASE = `${API}/api/v1`;
 
 export function ProposalDetails() {
     const { id } = useParams();

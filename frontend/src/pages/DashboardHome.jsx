@@ -3,7 +3,7 @@ import { ProposalCard } from "../components/ProposalCard";
 import { BarChart3, RefreshCw, Layers, History, Vote } from "lucide-react";
 
 const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
-const API_BASE = `${API}/api/v1/`;
+const API_BASE = `${API}/api/v1`;
 
 export function DashboardHome() {
     const [proposals, setProposals] = useState([]);
