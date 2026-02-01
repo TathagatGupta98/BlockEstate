@@ -132,6 +132,14 @@ export const syncProposalStatus = asyncHandler(async (req, res) => {
     
     console.log(`[SYNC] Chain State is: ${stateEnum} (Current DB Stage: ${proposal.status_stage})`);
 
+    // NEVER downgrade after stage-3
+    if (proposal.status_stage === "stage-3" || proposal.status_stage === "stage-4") {
+      return res.json(
+        new ApiResponse(200, { proposal, chainState: stateEnum }, "Frozen stage")
+      );
+    }
+
+
     // 4. Determine Target Stage
     // States: 0:Pending, 1:Active, 2:Canceled, 3:Defeated, 4:Succeeded, 5:Queued, 6:Expired, 7:Executed
     let targetStage = proposal.status_stage;
@@ -178,3 +186,33 @@ export const syncProposalStatus = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, proposal, "Sync failed (RPC Error)"));
   }
 });
+
+export const advanceProposalStage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const proposal = await Proposal.findById(id);
+    if (!proposal) {
+      return res.status(404).json({ success: false, message: "Proposal not found" });
+    }
+
+    // 🔒 Final & irreversible
+    if (proposal.status_stage !== "stage-2") {
+      return res.status(400).json({
+        success: false,
+        message: "Only stage-2 proposals can be advanced",
+      });
+    }
+
+    proposal.status_stage = "stage-3";
+    await proposal.save();
+
+    return res.json({
+      success: true,
+      data: proposal,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

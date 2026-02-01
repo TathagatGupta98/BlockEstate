@@ -7,8 +7,16 @@ import { ApiError } from "../utils/ApiError.js";
 // ================= CREATE BID =================
 
 export const createBid = asyncHandler(async (req, res) => {
-
   const { proposalId, companyId, estimatedId, description } = req.body;
+
+  const proposal = await Proposal.findById(proposalId);
+
+  if (proposal.status_stage !== "stage-2") {
+    return res.status(400).json({
+      success: false,
+      message: "Bidding is closed for this proposal",
+    });
+  }
 
   // Enhanced validation with better error messages
   if (!proposalId) {

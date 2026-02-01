@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { 
+  advanceProposalStage,
   createProposal, 
   getAllProposals,
   getProposalById,
@@ -18,7 +19,13 @@ router.get("/:id", getProposalById);
 router.patch("/:id/accept", acceptProposal);
 router.patch("/:id/reject", rejectProposal);
 
+
 // New Route for Lazy Sync
 router.post("/:id/sync", syncProposalStatus);
+
+
+router.post("/:id/advance-stage", advanceProposalStage);
+
+
 
 export default router;
