@@ -8,7 +8,7 @@ export default function Webpage() {
 
   }
   const handleCompaniesSumbit=()=>{
-    navigation("/creatCompaines")
+    navigation("/companyregister")
   }
   useEffect(() => {
     const sections = document.querySelectorAll(".left-section, .right-section");

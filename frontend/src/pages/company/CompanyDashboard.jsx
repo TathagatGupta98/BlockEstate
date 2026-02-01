@@ -1,14 +1,10 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Building2, Hammer, Clock, CheckCircle2, ChevronRight, Wallet, BadgeIndianRupee } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Hammer, Clock, CheckCircle2, ChevronRight, Wallet, X } from 'lucide-react';
+import CreateBid from '../CreateBid'; // Ensure this path matches where you saved CreateBid.jsx
 
-// Mock Data: Proposals accepted by residents (Stage 1) waiting for company bids
-const OPEN_RFPS = [
-  { id: 101, title: "Clubhouse Roof Renovation", budget: "5-7 ETH", deadline: "2 Days left", desc: "Complete waterproofing and tile replacement for the main clubhouse roof." },
-  { id: 102, title: "Solar Panel Installation", budget: "12-15 ETH", deadline: "5 Days left", desc: "Install 50KW solar grid for common area lighting." },
-];
+const API_BASE = "http://localhost:8000/api/v1";
 
-// Mock Data: Jobs the company has WON (Payment Stages)
+// Mock Data for Active Jobs (Keep this static for now as requested, focus is on Proposals)
 const ACTIVE_JOBS = [
   { 
     id: 204, 
@@ -25,9 +21,44 @@ const ACTIVE_JOBS = [
 
 export function CompanyDashboard() {
   const [activeTab, setActiveTab] = useState('opportunities');
+  
+  // Real Data States
+  const [proposals, setProposals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Modal State
+  const [selectedProposal, setSelectedProposal] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // 1. Fetch User (to get Company ID) & Proposals
+  useEffect(() => {
+    // Get logged in user from local storage
+    const userStr = localStorage.getItem("user"); // Assuming you store user object here
+    if (userStr) {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+    }
+
+    const fetchProposals = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/proposals`);
+        const json = await res.json();
+        const stage2Proposals = (json?.data || []).filter(p => p.status_stage === 'stage-2');
+        
+        setProposals(stage2Proposals);
+      } catch (error) {
+        console.error("Failed to fetch proposals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProposals();
+  }, []);
 
   return (
-    <div className="max-w-6xl mx-auto py-8 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto py-8 animate-in fade-in duration-500 relative">
       
       {/* Header Stats */}
       <div className="grid md:grid-cols-3 gap-6 mb-10">
@@ -39,8 +70,8 @@ export function CompanyDashboard() {
           <Wallet className="absolute right-4 bottom-4 text-maroon-800 opacity-50" size={64} />
         </div>
         <div className="bg-white border border-maroon-100 p-6 rounded-2xl shadow-sm">
-          <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Active Bids</h3>
-          <p className="text-3xl font-bold text-maroon-900 mt-1">3</p>
+          <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Open Opportunities</h3>
+          <p className="text-3xl font-bold text-maroon-900 mt-1">{proposals.length}</p>
         </div>
         <div className="bg-white border border-maroon-100 p-6 rounded-2xl shadow-sm">
           <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">Reputation Score</h3>
@@ -57,7 +88,7 @@ export function CompanyDashboard() {
           onClick={() => setActiveTab('opportunities')}
           className={`pb-4 text-sm font-bold transition-colors ${activeTab === 'opportunities' ? 'text-maroon-900 border-b-2 border-maroon-900' : 'text-gray-400 hover:text-gray-600'}`}
         >
-          Open Opportunities
+          Open Opportunities (Stage 2)
         </button>
         <button 
           onClick={() => setActiveTab('jobs')}
@@ -70,31 +101,50 @@ export function CompanyDashboard() {
       {/* Content Area */}
       {activeTab === 'opportunities' ? (
         <div className="grid gap-6">
-          {OPEN_RFPS.map((job) => (
-            <div key={job.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="bg-maroon-50 text-maroon-800 text-xs font-bold px-3 py-1 rounded-full border border-maroon-100">RFP #{job.id}</span>
-                  <span className="flex items-center gap-1 text-xs text-gray-500 font-medium"><Clock size={12} /> {job.deadline}</span>
+          {loading ? (
+             <div className="text-center py-10 text-gray-500">Loading opportunities...</div>
+          ) : proposals.length === 0 ? (
+             <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-2xl">
+                No proposals are currently accepting bids (Stage 2).
+             </div>
+          ) : (
+            proposals.map((job) => (
+                <div key={job._id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="bg-purple-50 text-purple-800 text-xs font-bold px-3 py-1 rounded-full border border-purple-100">
+                         Passed Voting
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-gray-500 font-medium">
+                        <Clock size={12} /> Posted: {new Date(job.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
+                    <p className="text-gray-500 mt-1 max-w-2xl line-clamp-2">{job.description}</p>
+                    
+                    {/* Visual indicator that this is ready for AI/Company */}
+                    <div className="flex items-center gap-2 mt-3 text-xs font-bold text-gray-400">
+                       <Building2 size={14} /> Ready for Bids
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-3 min-w-[150px]">
+                    <div className="text-right">
+                       {/* You can add a budget field to your schema later, for now placeholder */}
+                      <p className="text-xs text-gray-400 font-bold uppercase">Proposal ID</p>
+                      <p className="text-xs font-mono font-bold text-maroon-900 truncate w-24">{job.onChainProposalId?.substring(0, 8)}...</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => setSelectedProposal(job)}
+                      className="bg-maroon-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-maroon-800 transition flex items-center gap-2 text-sm shadow-lg shadow-maroon-100"
+                    >
+                      Submit Bid <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
-                <p className="text-gray-500 mt-1 max-w-2xl">{job.desc}</p>
-              </div>
-              
-              <div className="flex flex-col items-end gap-3 min-w-[150px]">
-                <div className="text-right">
-                  <p className="text-xs text-gray-400 font-bold uppercase">Est. Budget</p>
-                  <p className="text-lg font-bold text-maroon-900">{job.budget}</p>
-                </div>
-                <Link 
-                  to={`/company/bid/${job.id}`} 
-                  className="bg-maroon-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-maroon-800 transition flex items-center gap-2 text-sm"
-                >
-                  Submit Bid <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
-          ))}
+              ))
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -133,6 +183,39 @@ export function CompanyDashboard() {
           ))}
         </div>
       )}
+
+      {/* BID MODAL OVERLAY */}
+      {selectedProposal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden relative">
+                {/* Close Button */}
+                <button 
+                    onClick={() => setSelectedProposal(null)}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+                >
+                    <X size={24} />
+                </button>
+                
+                <div className="p-6 bg-gray-50 border-b border-gray-100">
+                    <h3 className="text-lg font-bold text-gray-900">Submit Proposal Bid</h3>
+                    <p className="text-sm text-gray-500">For: {selectedProposal.title}</p>
+                </div>
+
+                <div className="p-0">
+                    {/* Injecting your CreateBid Component Here */}
+                    <CreateBid 
+                        proposalId={selectedProposal._id} 
+                        companyId={currentUser?._id} // Passing logged in user ID
+                        onSuccess={() => {
+                            setSelectedProposal(null);
+                            // Optional: Refresh proposals list or show success toast
+                        }}
+                    />
+                </div>
+            </div>
+        </div>
+      )}
+
     </div>
   );
 }

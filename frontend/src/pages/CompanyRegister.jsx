@@ -2,9 +2,10 @@ import { useState } from "react";
 import API from "../services/auth.js";
 import { useNavigate } from "react-router-dom";
 
-export default function CompanyLogin() {
+export default function CompanyRegister() {
   const [form, setForm] = useState({
     name: "",
+    walletAddress: "",
     password: "",
   });
 
@@ -17,21 +18,16 @@ export default function CompanyLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
 
-      const res = await API.post("/companies/login", form);
-
-      // save token (basic way)
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("company", JSON.stringify(res.data.company));
+      await API.post("/companies/register", form);
 
       
-      navigate("/company/dashboard_");
+      navigate("/companylogin");
 
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      alert(err.response?.data?.message || "Error registering");
     } finally {
       setLoading(false);
     }
@@ -44,7 +40,7 @@ export default function CompanyLogin() {
         className="bg-white p-6 rounded-lg shadow-md w-96"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">
-          Company Login
+          Register Company
         </h2>
 
         <input
@@ -55,6 +51,15 @@ export default function CompanyLogin() {
           onChange={handleChange}
           className="w-full mb-3 p-2 border rounded"
           required
+        />
+
+        <input
+          type="text"
+          name="walletAddress"
+          placeholder="Wallet Address"
+          value={form.walletAddress}
+          onChange={handleChange}
+          className="w-full mb-3 p-2 border rounded"
         />
 
         <input
@@ -69,11 +74,17 @@ export default function CompanyLogin() {
 
         <button
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Registering..." : "Register"}
         </button>
       </form>
+       <p className="mt-4 text-center text-sm">
+        Already have an account?{" "}
+        <a href="/companylogin" className="text-blue-600 hover:underline">
+          Login
+        </a>
+      </p>
     </div>
   );
 }
