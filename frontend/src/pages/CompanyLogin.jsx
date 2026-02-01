@@ -23,14 +23,24 @@ export default function CompanyLogin() {
 
       const res = await API.post("/companies/login", form);
 
-      // save token (basic way)
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("company", JSON.stringify(res.data.company));
+      console.log("Login response:", res.data);
 
-      
+      // Save token AND company data
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
+      if (res.data.company) {
+        // Store the entire company object
+        localStorage.setItem("company", JSON.stringify(res.data.company));
+        console.log("Company data saved:", res.data.company);
+      }
+
+      alert("Login successful!");
       navigate("/company/dashboard_");
 
     } catch (err) {
+      console.error("Login error:", err);
       alert(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -73,6 +83,13 @@ export default function CompanyLogin() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        <p className="mt-4 text-center text-sm">
+          Don't have an account?{" "}
+          <a href="/companyregister" className="text-blue-600 hover:underline">
+            Register
+          </a>
+        </p>
       </form>
     </div>
   );

@@ -11,6 +11,7 @@ const bid=new mongoose.Schema({
     },
     estimatedId:{
         type:String,
+        default:""
 
     },
     description:{

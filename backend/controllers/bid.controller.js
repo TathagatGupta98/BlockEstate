@@ -10,9 +10,20 @@ export const createBid = asyncHandler(async (req, res) => {
 
   const { proposalId, companyId, estimatedId, description } = req.body;
 
-  if (!proposalId || !companyId || !description) {
-    throw new ApiError(400, "proposalId, companyId and description required");
+  // Enhanced validation with better error messages
+  if (!proposalId) {
+    throw new ApiError(400, "proposalId is required");
   }
+
+  if (!companyId) {
+    throw new ApiError(400, "companyId is required");
+  }
+
+  if (!description) {
+    throw new ApiError(400, "description is required");
+  }
+
+  console.log("Creating bid with data:", { proposalId, companyId, estimatedId, description });
 
   // Prevent same company bidding twice on same proposal
   const exists = await Bid.findOne({ proposalId, companyId });
@@ -24,9 +35,11 @@ export const createBid = asyncHandler(async (req, res) => {
   const bid = await Bid.create({
     proposalId,
     companyId,
-    estimatedId,
+    estimatedId: estimatedId || "", // Make it optional
     description
   });
+
+  console.log("Bid created successfully:", bid);
 
   res
     .status(201)
