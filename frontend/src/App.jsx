@@ -61,6 +61,8 @@ const router = createBrowserRouter([
   { path: "/companyregister", element: <CompanyRegister /> },
   { path: "/companylogin", element: <CompanyLogin /> },
   { path: "/company/dashboard_", element: <CompanyDashboard /> },
+  { path: "/openCompany", element: <Companies/> },
+  
 ]);
 
 function App() {

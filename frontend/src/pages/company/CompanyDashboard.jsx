@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Building2, Hammer, Clock, CheckCircle2, ChevronRight, Wallet, X } from 'lucide-react';
 import CreateBid from '../CreateBid'; // Ensure this path matches where you saved CreateBid.jsx
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000";
 
@@ -28,7 +29,10 @@ export function CompanyDashboard() {
   
   // Modal State
   const [selectedProposal, setSelectedProposal] = useState(null);
-
+  const navigate=useNavigate();
+  const handleCompainesSumbit=()=>{
+    navigate("/openCompany")
+  }
   // 1. Fetch Proposals
   useEffect(() => {
     const fetchProposals = async () => {
@@ -93,6 +97,12 @@ export function CompanyDashboard() {
           className={`pb-4 text-sm font-bold transition-colors ${activeTab === 'jobs' ? 'text-maroon-900 border-b-2 border-maroon-900' : 'text-gray-400 hover:text-gray-600'}`}
         >
           Active Contracts
+        </button>
+        <button 
+          onClick={handleCompainesSumbit}
+          className={`pb-4 text-sm font-bold transition-colors ${activeTab === 'jobs' ? 'text-maroon-900 border-b-2 border-maroon-900' : 'text-gray-400 hover:text-gray-600'}`}
+        >
+          Compaines
         </button>
       </div>
 
