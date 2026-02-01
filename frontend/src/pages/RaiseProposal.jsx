@@ -12,6 +12,10 @@ const ERC20_TRANSFER_ABI = [{
   stateMutability: 'nonpayable' 
 }];
 
+const API = import.meta.env.VITE_BACKEND_URL?.trim() || "http://localhost:8000"; // change if needed
+const API_BASE = `${API}/api/v1/`;
+
+
 export function RaiseProposal() {
   const [formData, setFormData] = useState({ title: '', description: '', amount: '', recipient: '' });
   const [createdProposalId, setCreatedProposalId] = useState(null);
@@ -29,7 +33,7 @@ export function RaiseProposal() {
   useEffect(() => {
     const saveToBackend = async (proposalId) => {
       console.log(proposalId, "this");
-      const res = await fetch("http://localhost:8000/api/v1/proposals/create", {
+      const res = await fetch(`${API_BASE}/proposals/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
