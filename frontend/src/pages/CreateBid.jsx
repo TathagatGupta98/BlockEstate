@@ -13,9 +13,9 @@ export default function CreateBid({ proposalId, companyId, onSuccess }) {
       setLoading(true);
 
       await API.post("/bids/create", {
-        proposalId, // <--- This is auto-filled from the prop
+        proposalId, 
         companyId,
-        estimatedCost, // Sending the cost/bid amount
+        estimatedCost, 
         description
       });
 
