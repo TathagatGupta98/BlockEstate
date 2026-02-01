@@ -496,11 +496,40 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 
 ## 👥 Team
 
-**Core Contributors**
-- Blockchain Lead - Tathagat Gupta
-- Full-Stack Developer - Mohammad Ibrahim
-- UI/UX Designer - Mohammed Wasif Ansari
-- AI Engineer - Uttkarsh Shrivastav
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/TathagatGupta98">
+        <img src="https://github.com/TathagatGupta98.png" width="100px;" alt=""/>
+        <br /><sub><b>TathagatGupta98</b></sub>
+      </a>
+      <br />Smart Contracts, Blockchain Integratio
+    </td>
+    <td align="center">
+      <a href="https://github.com/Ibrahim2750mi">
+        <img src="https://github.com/Ibrahim2750mi.png" width="100px;" alt=""/>
+        <br /><sub><b>Ibrahim2750mi</b></sub>
+      </a>
+      <br />configuration,logics, Frontend,UI ,UX
+    </td>
+    <td align="center">
+      <a href="https://github.com/justwasif">
+        <img src="https://github.com/justwasif.png" width="100px;" alt=""/>
+        <br /><sub><b>justwasif</b></sub>
+      </a>
+      <br />Frontend, Backend,batabase (fullstack MERN)
+    </td>
+     <td align="center>
+        <a href="https://github.com/uttkarshshrivastave">
+        <img src="https://github.com/uttkarshshrivastave.png" width="100px;" alt=""/>
+        <br/><sub><b>uttkarshshrivastave</b></sub>
+     </a>
+     <br/>ai agent ,frontend
+      
+   </td>
+  </tr>
+</table>
+
 ---
 
 ## 📊 Project Status
