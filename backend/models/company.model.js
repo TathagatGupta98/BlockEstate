@@ -1,6 +1,8 @@
-import mongoose, { model } from "mongoose";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const company = new mongoose.Schema({
+const companySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -19,23 +21,24 @@ const company = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-company.pre("save",async function() {
-  if(!this.isModified("password")) return;
-  this.password=await brcypt.hash(this.password,10)
-  
+
+companySchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
-company.methods.generateAccessToken=function(){
-  return JsonWebTokenError.sign(
+
+companySchema.methods.generateAccessToken = function () {
+  return jwt.sign(
     {
-      _id:this._id,
-      name:this.name,
-      verified:this.verified
+      _id: this._id,
+      name: this.name,
+      verified: this.verified
     },
-    process.env.JWT_ACCESSES_TOKEN || "fallback-refresh-key-change-this",
-    {expiresIn:process.env.JWT_REFRESH_EXP || "7d"}
-
+    process.env.JWT_ACCESS_TOKEN || "fallback-secret-key",
+    { expiresIn: "7d" }
   );
-}
+};
 
-export const Company =mongoose.model("Company", company);
+
+export const Company = mongoose.model("Company", companySchema);

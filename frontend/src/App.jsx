@@ -18,14 +18,14 @@ import { CompanyDashboard } from './pages/company/CompanyDashboard';
 // import { CompanyBid } from './pages/company/CompanyBid';
 // import { CompanyBid } from './pages/company/CompanyBid';
 import VotePage from './pages/VotePages';
-import CreateCompany from './pages/CreatCompany';
+import CompanyRegister from './pages/CompanyRegister';
 import Companies from './pages/Compaines';
 import BidPage from './pages/BidPage';
 import CreateBid from './pages/CreateBid';
 import ProposalBids from './pages/ProposalBids';
 import Webpage from './pages/Webpage';
 import CompanyHeader from './components/CompanyHeader';
-
+import CompanyLogin from './pages/CompanyLogin';
 
 
 // 1. Initialize QueryClient OUTSIDE the component to prevent resets
@@ -53,7 +53,6 @@ const router = createBrowserRouter([
 
       
       {path:"/companies",element:<Companies/>},
-      {path:"/createbid",element:<CreateBid/>},
       {path:"/proposalbids",element:<ProposalBids/>},
       {path:"/bidpage",element:<BidPage/>},
 
@@ -70,7 +69,9 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-  {path:"/creatCompaines",element:<CreateCompany/>},
+  // {path:"/creatCompaines",element:<CreateCompany/>},
+  {path:"/companyregister",element:<CompanyRegister/>},
+  {path:"/companylogin",element:<CompanyLogin/>},
   
   
   {
