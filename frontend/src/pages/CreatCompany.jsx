@@ -23,7 +23,7 @@ export default function CreateCompany() {
         walletAddress
       });
 
-      navigate("/companies");
+      navigate("/company/dashboard");
 
     } catch (err) {
       alert(err.response?.data?.message || "Error");

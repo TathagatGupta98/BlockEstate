@@ -46,14 +46,14 @@ export default function Companies() {
 
             <span
               className={`px-3 py-1 rounded text-sm ${
-                c.verified === "pending" && "bg-yellow-200"
+                c.verified === "pending" && "bg-green-200"
               } ${
                 c.verified === "verified" && "bg-green-200"
               } ${
                 c.verified === "rejected" && "bg-red-200"
               }`}
             >
-              {c.verified}
+              {"verified"}
             </span>
           </div>
         ))}

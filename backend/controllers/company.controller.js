@@ -4,6 +4,15 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
 
+const generateTokens=async(company)=>{
+  const accessToken=company.generateAccessToken();
+  const refreshToken=company.generateRefreshToken();
+  company.refreshToken=refreshToken;
+  await company.save({ValidityState:false});
+  return{accessToken,refreshToken};
+
+}
+
 // ================= CREATE =================
 
 export const createCompany = asyncHandler(async (req, res) => {
