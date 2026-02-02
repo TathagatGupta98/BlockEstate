@@ -1,4 +1,4 @@
-# ResiDAO - Decentralized Housing Society Governance Platform
+# BlockEstate - Decentralized Housing Society Governance Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solidity](https://img.shields.io/badge/Solidity-^0.8.20-363636?logo=solidity)](https://soliditylang.org/)
@@ -13,7 +13,7 @@ A revolutionary blockchain-based platform that transforms traditional housing so
 
 ## 🏆 Hackathon Submission
 
-**Team Name:** ResiDAO  
+**Team Name:** BlockEstate  
 **Hackathon:** Merge Conflict 2025  
 **Organizer:** MDG Space, IIT Roorkee
 
@@ -76,9 +76,9 @@ A revolutionary blockchain-based platform that transforms traditional housing so
 
 ## 🌟 Overview
 
-ResiDAO reimagines housing society management by replacing outdated committee systems with a transparent, blockchain-powered governance platform. Residents vote on proposals using Soulbound Tokens (SBTs), while AI agents analyze contractor bids and optimize decision-making.
+BlockEstate reimagines housing society management by replacing outdated committee systems with a transparent, blockchain-powered governance platform. Residents vote on proposals using Soulbound Tokens (SBTs), while AI agents analyze contractor bids and optimize decision-making.
 
-### What Makes ResiDAO Unique?
+### What Makes BlockEstate Unique?
 
 - **True Democracy:** 1 Person = 1 Vote via non-transferable Soulbound Tokens
 - **AI-Powered Decisions:** Multi-agent system evaluates proposals and contractor bids
@@ -102,7 +102,7 @@ Traditional housing societies face critical challenges:
 
 ## 💡 Solution
 
-ResiDAO provides an end-to-end blockchain governance platform featuring:
+BlockEstate provides an end-to-end blockchain governance platform featuring:
 
 ### **Stage 1: Democratic Proposal System**
 Residents submit proposals (repairs, upgrades, policies) that undergo on-chain voting. Once a proposal passes, it automatically advances to Stage 2.
@@ -377,8 +377,8 @@ function evaluationAgent(amount, analysis, lowestAmount) {
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/justwasif/ResiDAO.git
-cd ResiDAO
+git clone https://github.com/justwasif/BlockEstate.git
+cd BlockEstate
 ```
 
 ### 2. Smart Contract Setup
@@ -563,7 +563,7 @@ await tokenContract.delegate(userAddress);
 ## 📁 Project Structure
 
 ```
-ResiDAO/
+BlockEstate/
 │
 ├── smartContracts/          # Foundry project
 │   ├── src/
@@ -707,8 +707,8 @@ We welcome contributions from the community! Here's how you can help:
 
 1. **Fork the Repository**
 ```bash
-git clone https://github.com/yourusername/ResiDAO.git
-cd ResiDAO
+git clone https://github.com/yourusername/BlockEstate.git
+cd BlockEstate
 git checkout -b feature/your-feature-name
 ```
 
@@ -739,7 +739,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ```
 MIT License
 
-Copyright (c) 2025 ResiDAO Team
+Copyright (c) 2025 BlockEstate Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -763,7 +763,7 @@ copies of the Software...
 ## 📞 Contact
 
 - **Email:** resida0team@gmail.com
-- **Twitter:** [@ResiDAO](https://twitter.com/ResiDAO)
+- **Twitter:** [@BlockEstate](https://twitter.com/BlockEstate)
 - **Discord:** [Join Our Community](#)
 
 
@@ -771,9 +771,9 @@ copies of the Software...
 
 <div align="center">
 
-**Built with ❤️ by Team ResiDAO**
+**Built with ❤️ by Team BlockEstate**
 
-[![GitHub stars](https://img.shields.io/github/stars/justwasif/ResiDAO?style=social)](https://github.com/justwasif/ResiDAO/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/justwasif/ResiDAO?style=social)](https://github.com/justwasif/ResiDAO/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/justwasif/BlockEstate?style=social)](https://github.com/justwasif/BlockEstate/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/justwasif/BlockEstate?style=social)](https://github.com/justwasif/BlockEstate/network/members)
 
 </div>
